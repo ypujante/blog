@@ -1,0 +1,81 @@
+
+---
+layout: post
+title: Improving performances of a Lucene Search
+category: java
+---
+<p><a href="http://lucene.apache.org/">Lucene</a> is a popular java based text search engine. You add documents to the index using an <code>IndexWriter</code> and then you can search the index using an <code>IndexSearcher</code>. In order to search, the most flexible api is to use the callback api:</p>
+
+<pre>
+indexSearcher.search(query, new new HitCollector() {
+  public void collect(int docID, float score) {
+  // do whatever you want...
+ }});
+</pre>
+
+<p>
+For every document which matches the query, Lucene calls the hit collector with the document id of the match as well as the score. This document id is internal to Lucene and cannot be relied upon as it can (and will) change (for example when optimizing the index). The usual practice is to add a field to the document that you index which contains an id which has meaning in your application:
+</p>
+
+<pre>
+Document doc = new Document();
+doc.add(new Field("ID", String.valueOf(myID),
+                   Field.Store.YES, Field.Index.NOT_ANALYZED));
+</pre>
+<p>
+This is useful as well when you want to update/delete the document from the index:
+</p>
+<pre>
+indexWriter.deleteDocuments(new Term("ID", String.valueOf(myID)));
+</pre>
+
+<p>In the callback loop, you can then retrieve your id from the Lucene document id by doing <code>indexSearcher.doc(docID)</code> which returns a <code>Document</code> from which you can simply extract your previously stored id.
+<br/>
+This works fine, but is relatively expensive. Indeed, Lucene is very good at caching the index in memory but the problem is since the document is not part of the cache, then it requires a disk access. Depending on how many documents are matching the query it can have some serious implication on the performance.
+</p>
+<p>
+When I mentioned that you cannot rely on the Lucene id because it changes, it is true. Nonetheless, while the index searcher is opened and until you close it, this id will not change. We can use this property to add some caching which will improve the performances quite a bit. The idea is that when you open the searcher, you simply 'read' and cache all your ids in memory (and you discard the cache when you close it):
+</p>
+<pre>
+String[] myCache = FieldCache.DEFAULT.getStrings(searcher, "ID");
+// each entry in the cache is simply the doc id from Lucene!
+</pre>
+<p>
+To make things nicer, I hid all of this under some apis and created my own wrapper:
+</p>
+<pre>
+// a hit collector with userData
+public interface LuceneHitCollector&lt;T&gt; {
+  void collect(int doc, float score, T userData);
+}
+
+// wraps a lucene searcher to use the new hit collector
+public class LuceneIndexSearcherImpl&lt;T&gt; implements LuceneIndexSearcher&lt;T&gt;
+{
+  private final IndexSearcher _indexSearcher;
+  private final T[] _userData;
+
+  public LuceneIndexSearcherImpl(IndexSearcher indexSearcher, T[] userData) {
+    _indexSearcher = indexSearcher;
+    _userData = userData;
+  }
+
+  public LuceneHitCollector&lt;T&gt; search(Query query, final LuceneHitCollector&lt;T&gt; collector)
+    throws IOException {
+    _indexSearcher.search(query, new HitCollector() {
+      public void collect(int doc, float score) {
+        collector.collect(doc, score, _userData[doc]);
+      }});
+    return collector;
+  }
+}
+</pre>
+<p>
+The performance improvements are quite dramatic: a query that used to take around 350ms is now taking about 14ms! Pretty nice. Of course this will work well if you open your searcher and keep it open for several queries which is the case of my application. This technique requires some extra memory but if you can afford it, it is totally worth it.
+</p>
+<p>
+Note that the api I created is using generics: I wanted to be able to use the payload feature if I need later on to store more than the id. For example if I wanted to store an id and a timestamp, I could create a small serializable object and store it (serialized) as a byte array in the payload of the field. When I open the searcher I could read all the payloads and deserialize them in an array of the correct object type (instead of an array of <code>String</code>s like in the example). To create an array of the proper size you can simply use the <code>searcher.maxDoc()</code> api. The code to use the payload feature is a little cumbersome/complicated and would require too much code to demonstrate in this blog.
+</p>
+<p>
+This post is presenting one solution to improve the performances of a Lucene search but there are many other techniques. It definitely works if you have a little extra memory to spare. I wanted to thank the LinkedIn search team for the inspiration!
+</p>

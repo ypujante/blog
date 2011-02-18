@@ -1,0 +1,132 @@
+
+---
+layout: post
+title: Connecting to a local vm using jmx knowing the process id.
+category: java
+tags:
+  - java
+  - jmx
+---
+<p>
+On the project I am currently working on at LinkedIn, I needed to programatically access the jmx interface of a java VM. The caller is another program written in java/groovy and knows the process id of the VM it wants to talk to. Note that both VMs are running on the same host. jconsole does exactly that so it should be pretty straightforward. In the end, it is not very complicated, but to get to that point it took me several hours of scratching my head and debugging to make it right.
+</p>
+
+<p>
+The page <a href="http://java.sun.com/javase/6/docs/technotes/guides/management/agent.html">Monitoring and Management Using JMX Technology</a>, describes a technique which allows you to attach to another virtual machine using the <a href="http://www.kiwidoc.com/java/l/x/java/j2se/1.6/p/com.sun.tools.attach/c/VirtualMachine"/>com.sun.tools.attach.VirtualMachine</a> (which is not part of the standard jdk 1.6 api, but is an internal SUN class so if you use a SUN VM, it is available. It is part of the <a href="http://openjdk.java.net/">OpenJDK</a> project).
+</p>
+
+<p>
+Extracting the JMXServiceURL (groovy):
+<pre>private static final String CONNECTOR_ADDRESS =
+  "com.sun.management.jmxremote.localConnectorAddress";
+
+private JMXServiceURL extractJMXServiceURL(pid)
+{
+  // attach to the target application
+  com.sun.tools.attach.VirtualMachine vm = 
+    com.sun.tools.attach.VirtualMachine.attach(pid.toString());
+
+  try
+  {
+    // get the connector address
+    String connectorAddress = 
+      vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
+
+    // no connector address, so we start the JMX agent
+    if (connectorAddress == null) {
+      String agent = vm.getSystemProperties().getProperty("java.home") +
+                     File.separator + "lib" + File.separator + 
+                     "management-agent.jar";
+      vm.loadAgent(agent);
+
+      // agent is started, get the connector address
+      connectorAddress = 
+        vm.getAgentProperties().getProperty(CONNECTOR_ADDRESS);
+    }
+
+    // establish connection to connector server
+    return new JMXServiceURL(connectorAddress);
+  }
+  finally
+  {
+    vm.detach()
+  }
+}</pre>
+
+Once you obtain the <a href="javax.management.remote.JMXServiceURL"><tt>JMXServiceURL</tt></a>, then you need a reference to the <a href="http://www.kiwidoc.com/java/l/p/java/j2se/1.6/p/javax.management.remote/c/JMXConnector"><tt>JMXConnector</tt></a>:
+<pre>def connector = JMXConnectorFactory.connect(url);
+def connection = connector.getMBeanServerConnection();
+// use the connection...
+</pre>
+
+When I tried this approach it was working fine on my development environment but when I deployed it on a test machine, I got the following exception:
+<pre>Caused by: com.sun.tools.attach.AttachNotSupportedException: 
+ Unable to open door: target process not responding or HotSpot VM not loaded 
+  at sun.tools.attach.SolarisVirtualMachine.<init>(SolarisVirtualMachine.java:68) 
+  at sun.tools.attach.SolarisAttachProvider.attachVirtualMachine(SolarisAttachProvider.java:42) 
+  at com.sun.tools.attach.VirtualMachine.attach(VirtualMachine.java:195) 
+  at com.sun.tools.attach.VirtualMachine$attach.call(Unknown Source)</pre>
+
+<p>
+Quite an unusual error message if you are not familiar with Solaris... The issue that I uncovered here is that the ability to attach to another VM is jdk1.6 only and on the test machine I was trying to connect from a 1.6 VM to a 1.5 VM and that does not work (note that in my case I have no choice and need to run with both VMs).
+</p>
+
+<p>
+To fix this issue, I needed a way that would work with both VMs. There is another internal API which can be used to extract the <tt>JMXServiceURL</tt>: using the class <a href="http://www.kiwidoc.com/java/l/x/java/j2se/1.6/p/sun.management/c/ConnectorAddressLink">sun.management.ConnectorAddressLink</a>:
+
+<pre>private JMXServiceURL extractJMXServiceURL(pid)
+{
+  String serviceURL = null
+  try
+  {
+    serviceURL = sun.management.ConnectorAddressLink.importFrom(pid as int)
+  }
+  catch(IOException e)
+  {
+    log.warn("Cannot find process ${pid}")
+  }
+    
+  if(serviceURL == null)
+    return null
+  else
+    return new JMXServiceURL(serviceURL)
+}</pre>
+
+Something to keep in mind, is that there is a difference between 1.5 and 1.6: 
+<li>In 1.5: you need to explicitely enable jmx as described in the page <a href="http://java.sun.com/j2se/1.5.0/docs/guide/management/agent.html">Monitoring and Management Using JMX</a> by starting your java 5 program with the <tt>-Dcom.sun.management.jmxremote</tt> system property.</li>
+<li>In 1.6: <em>"In the Java SE 6 platform, it is no longer necessary to set this system property. Any application that is started on the Java SE 6 platform will support the Attach API, and so will automatically be made available for local monitoring and management when needed."</em></li>
+
+<p>
+This solution was working great in my development environment but was failing again in my testing environment. I spend close to 3 hours in trial and error: the issue now was an "<tt>IOException: process not found</tt>" error when calling the <tt>importFrom</tt> method. At some point, I realized that when I was using <tt>jconsole</tt>, it was not listing my java processes and that the <tt>jps</tt> command was not returning anything either.
+</p>
+
+<p>
+I then run my test program using the <tt>truss</tt> command (Solaris) which logs all the system calls. I then realized that the method is looking for a file called <tt>/tmp/hsperfdata_<em>&lt;username&gt;</em>/<em>&lt;pid&gt;</em></tt> (where <tt>username</tt> is the user executing the unix process). This folder was empty and this is why it was not returning anything. I later on realized that the permissions on the folder were wrong and were preventing the VM to write its pid in it. The frustrating part is that the failure was totally silent and never reported in any log file and there was no way to turn on any debugging level to see the error. If it wasn't for the <tt>truss</tt> command I am not certain how I could have figured this out since it is totally undocumented and fails silently. Changing the permissions on the folder immediately fixed the problem!
+</p>
+
+This is a very good demonstration of why the pattern:
+<pre>try
+{
+ // do something which may throw an exception but if it does I will ignore 
+ // and continue
+}
+catch(Exception e)
+{
+ // ok ignored
+}
+</pre>
+
+is a very bad pattern and should be replaced with something like:
+<pre>try
+{
+ // do something which may throw an exception but if it does I will ignore 
+ // and continue
+}
+catch(Exception e)
+{
+ // ok ignored
+ if(log.isDebugEnabled())
+  log.debug("ignored exception", e)
+}
+</pre>
+

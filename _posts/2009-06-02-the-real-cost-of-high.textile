@@ -1,0 +1,34 @@
+
+---
+layout: post
+title: The real cost of high-speed internet in the US
+category: misc
+tags:
+  - internet
+---
+<p>
+I just came back from a trip to France to visit my family and I helped my dad with his internet connection, so I got to spend quite some time looking at what is available and at what price. As I arrived in the US, I found out that my high speed (Comcast) internet bill has gone up. While closely looking at the bill, it is not that they raised their prices, but that my promotional cycle is unfortunately over.
+</p>
+
+<p>
+I dug up a little more to try to see if I could get a better deal. The thing that really annoys me is how Comcast advertises in big letter how High Speed internet is 'only' $19.99 a month. Of course it is a promotional offer and if you look closely at the terms and condition, there is already a catch: you must subscribe to another of their service to even get the promotion. Their cheapest service is basic cable TV which adds up $15.39 a month for a total of $35.38 (a 77% increase from the big advertised price!). And when the promotion ends, the rate goes up to $58.34 (close to a 3x the price advertised in big letter). In my case I don't even care about cable TV as I use Dish, but I have to pay for it. Note that if you do not want basic cable, then high speed internet is $58.95 even more expensive. I am sure the practice is legal, but I think it is a big scam to advertise a prize that will triple in 6 months...
+</p>
+
+<p>
+So is there a better deal ? Well not really. I looked around and the only real other choice in my area is DSL for over $45 a month with speeds 10x slower. The second thing that really annoys me is that I am not living in a rural US area! I am in the middle of the Silicon Valley (Mountain View), the heart of most of the big internet services!
+</p>
+
+<p>
+As I was mentioning, I ended up doing some research in France and you can get TV + Internet (20M) + Unlimited phone (including to other countries) for about 30 euros a month (roughly $42). And I know that it is still expensive as some other north european countries offer high speed internet for $7 a month.
+</p>
+
+<p>
+Why is it so bad in the US ? The reason that I can think of is monopoly. The reality is that besides internet cable there is just no match in my area in terms of speed. Since cable is owned by Comcast then I just don't have a choice, if I want the speed I just have to cough up the cash (and even if I don't want the speed, DSL alternatives are also extremely expensive for what they offer). In France, France Telecom used to have a monopoly in terms of phone lines, but there has been laws that forced the company to loan the phone lines to competitors and this has driven competition like crazy: there are many offers to choose from and that has driven the prices down. If you read french, it is called <a href="http://fr.wikipedia.org/wiki/D%C3%A9groupage">dégroupage</a>:
+<em>
+"La loi oblige (en France, et dans l'Union européenne) l'opérateur historique à fournir un accès dégroupé à la boucle locale aux opérateurs alternatifs. [...] Le dégroupage rend, en particulier, possible une concurrence réelle dans les offres commerciales d'ADSL et permet ainsi une baisse des tarifs de détail."
+</em>
+</p>
+
+<p>
+In the end I think it is a pretty grim reality because roughly $60 a month for high speed internet is seriously limiting penetration. This has a lot of impacts on companies like YouTube and others which rely on fast internet access to provide their service and in the end it has impact on the economy. Some companies (ex: Comcast) are benefiting from this monopoly but the real cost is the dive in worldwide ranking (from #1 to #15) in broadband use with the long term consequences that it will have for the country on a global scale. My only hope today is that the new administration will finally wake up and do something about it.
+</p>

@@ -1,0 +1,18 @@
+
+---
+layout: post
+title: CSS for the UI design
+category: pongasoft
+tags:
+  - css
+  - html
+---
+In a <a href="http://www.pongasoft.com/blog/yan/entry/grails_groovy_for_the_frontend">previous post</a>, I was talking about using Grails/Groovy to build the front-end. The final rendering needs to be made pretty/attractive. The old days of using tables and spacer gif to have the page looks good have thankfully been replaced with CSS. Not being a web designer myself, I had some very rudimentary notions of what CSS is. I used it a little to build/tweak the blog you are reading, but I must admit I was kind of flying blind as I did not understand it fully nor did I know enough to be efficient. The result although looking nice (at least to my tastes :)), certainly left to be desired and there are many things I wanted to do that I could not achieve (just check how the right sidebar seems to be detached and disappears if the window gets too small...). 
+
+I hunted for books about CSS and ended up buying 2: 
+
+<li><a href="http://www.amazon.com/gp/product/0596527330?ie=UTF8&tag=pongasoft-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0596527330">CSS: The Definitive Guide</a><img src="http://www.assoc-amazon.com/e/ir?t=pongasoft-20&l=as2&o=1&a=0596527330" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />: the title essentially sums it all. It is a definitive guide, pretty hard to read cover to cover (but to be fair, not designed to be read this way). It is kind of a shame that the book is not in color which makes it hard to follow the examples especially the one using colors... There is an entire chapter about selectors and I think it is pretty useful to grasp the concepts.
+</li>
+<br/>
+<li><a href="http://www.amazon.com/gp/product/0321509021?ie=UTF8&tag=pongasoft-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0321509021">Bulletproof Web Design: Improving flexibility and protecting against worst-case scenarios with XHTML and CSS</a><img src="http://www.assoc-amazon.com/e/ir?t=pongasoft-20&l=as2&o=1&a=0321509021" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />: I love this book! It is very well written and progressive (so it is perfect for beginners). Most importantly it gave me a starting point to work on the front-end of my application. There are a million different ways to achieve the same effects or results and when you are new to a technology it is really difficult to know which way is better than the other (or even find a way to start). I think this is where this book shines. The angle chosen is to design your html (or xhtml) and css in a way that will accommodate changes (like your text span 2 lines instead of one because it is longer than anticipated) and make it useable even for a user who does not have images or css at all! The reason why this book really grasped me is because it is very close in spirit to what I normally do when I write good object oriented code: there are techniques that I learned throughout my career to make my designs flexible and bulletproof (meaning it will accommodate changes without having to start from scratch) and this is exactly what this book teaches you for the front-end. A must read!</li>
+

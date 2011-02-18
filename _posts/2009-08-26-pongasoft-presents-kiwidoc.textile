@@ -1,0 +1,28 @@
+
+---
+layout: post
+title: pongasoft presents... kiwidoc
+category: pongasoft
+---
+Back in April, I introduced the <a href="http://www.pongasoft.com/blog/yan/entry/pongasoft_a_new_adventure">new adventure</a> I was embarking on with pongasoft. It has been quite a ride but I am very proud to finally be able to release the service: it is called <a href="http://www.kiwidoc.com">kiwidoc</a>.
+
+You can find more information about the service itself on the <a href="http://www.kiwidoc.com/java/info/about">About</a> page including a description of all the main features that I was able to implement for the beta release. Here is the introduction:
+
+<p style="font-style:italic">
+In a few words, kiwidoc can be described as javadoc on steroids. The main goal is to help software developpers quickly find the information about java libraries in a single location:
+
+<ul style="font-style:italic">
+    <li>proximity search and typeahead allow you to quickly locate what you are looking for.</li>
+    <li>IDE-style display shows you the relevant information in a familiar format.</li>
+    <li>immediate access to additional information such as library dependencies, manifest, OSGi 
+    headers, etc.</li>
+    <li>the private view can provide even more details if you need to dig deeper (in order to, for example
+    extend a library or better understand its internals).</li>
+</ul>
+</p>
+
+Now that the kiwi has been unleashed (there was a little clue on this blog about the name/logo :)), I will be able to talk more freely about the technologies and some of the issues I faced during the development. There is already some information on the <a href="http://www.kiwidoc.com/java/info/credits">Credits</a> page about all the open source libraries I used.
+
+Of course due to the amount of work and the fact that I already have a full time job, I was unable to implement all the features I wanted to include in the beta launch, and I have many more coming up to improve the service. But it will also depend on the feedback I am going to receive. So please, leave feedback (on this blog or at <a href="mailto:feedback@kiwidoc.com">feedback@kiwidoc.com</a>), even if you hate the product and you think it is a stupid idea.
+
+Finally I wanted to particularly thank my partner, Markus Tuberville, for the awesome logos and icons that he created for the website (including this blog).

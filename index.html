@@ -1,0 +1,17 @@
+---
+layout: default
+title: Home
+---
+This is the main page
+
+{% for post in site.posts limit:1 %}
+{% include post.html %}
+{% endfor %}
+<hr/>
+<ul id="history">
+{% for post in site.posts offset:1 %}
+<li class="history-item">
+  {{ post.date | date: "%Y-%m-%d" }} | <a href="{{ site.url }}{{ post.url }}">{{ post.title }}</a>
+</li>
+{% endfor %}
+</ul>

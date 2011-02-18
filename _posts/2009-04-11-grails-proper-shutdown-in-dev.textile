@@ -1,0 +1,58 @@
+
+---
+layout: post
+title: Grails - Proper shutdown in dev mode
+category: grails
+tags:
+  - grails
+  - groovy
+  - spring
+  - java
+---
+<p>For my main project I am using Grails for the front-end (I will relate in an upcoming post why I chose this technology in the first place). Grails has this very interesting development mode which allows you to continue working on your application and see the changes right away. To start the application you usually issue the command:</p>
+<pre>
+grails run-app
+</pre>
+or if you use maven
+<pre>
+mvn grails:run-app
+</pre>
+
+To shutdown (for restarting for example), you do a <code>CTRL-C</code> which terminates the process. Grails uses the Spring framework to bootstrap your application.  It also allows you to define your own beans. However, I noticed that when terminating the application, the beans that I had registered with a <code>destroy-method</code> were not being properly shutdown (the destroy method is simply not called). I tried to find a way to change this behavior by default but did not find anything. I then implemented my own shutdown solution in this manner:
+
+<p>
+I created a simple class in <code>grails-app/utils/com/mypackage/ShutdownHook.groovy</code> which registers a VM-wide shutdown hook when it gets called by Spring (<code>ApplicationContextAware</code>)
+</p>
+<pre>
+package com.mypackage
+
+import org.springframework.context.ApplicationContextAware
+import org.springframework.context.ApplicationContext
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+
+public class ShutdownHook implements ApplicationContextAware
+{
+  public static final Log log = LogFactory.getLog(ShutdownHook.class)
+
+  public void setApplicationContext(ApplicationContext applicationContext)
+  {
+    Runtime.runtime.addShutdownHook {
+      log.info("Application context shutting down...")
+      applicationContext.close()
+      log.info("Application context shutdown.")
+    }
+    log.info("Shutdown hook setup...")
+  }
+}
+</pre>
+
+Then I added the following block in <code>grails-app/conf/spring/resources.groovy</code> which conditionally creates the bean only in development mode (thanks to groovy Spring DSL!).
+<pre>
+if(grails.util.GrailsUtil.isDevelopmentEnv())
+{
+  myShutdownHook(com.mypackage.ShutdownHook)
+}
+</pre>
+
+It works really well as my beans get properly destroyed when the application terminates. Nonetheless it would be better if it was part of the Grails framework by default. I opened a <a href="http://jira.codehaus.org/browse/GRAILS-4404">Jira (GRAILS-4404)</a> ticket for it.

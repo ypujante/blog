@@ -1,0 +1,52 @@
+
+---
+layout: post
+title: Starting from scratch... domain name and web hosting
+category: pongasoft
+---
+<p>
+When I started having the idea of a project that I could build, two things popped up right away: I needed a domain name and I needed some sort of web hosting solution. To be honest, both topics were totally brand new to me and I spent a significant amount of time investigating what is available. 
+<p>
+
+<p>
+Getting a domain name sounds like a trivial thing to do, but it turned out to be not such an easy task for two reasons:
+<ul>
+<li>
+ Finding a 'good' domain name is important and of course most of them are already taken. A big portion of them are simply unavailable because people owns them in the hope of reselling them for profit. Once you have decided on a domain name, then figuring out if it is available or not is thankfully an easy task as every single name registrar allows you to check if it is available.
+</li>
+<li>
+  There is a lot of websites that offer domain name registration, all trying to compete on which one is the most flashy. They all seem to have tons of different options or programs which adds to the confusion. 
+</li>
+</ul>
+</p>
+<p>
+I ended up settling down for <em>Network Solutions</em> for the domain name of the company (pongasoft.com) because it had been recommended as being serious, they are offering a privacy feature (to not expose your private information in the <a href="http://www.internic.net/whois.html">whois</a> database (albeit for an extra $10)) and I could see the potential of using their web hosting solution and 'Servlet' support. Clearly they are not the cheapest one, but I needed to start somewhere.
+</p>
+
+<p>
+  Once I had a domain name, I started looking for web hosting. I think it is probably even worse than domain name hunting as the variety of what is offered is way more diverse. On top of that, most of them adding to the confusion by bundling domain name for free (under some conditions). In the end, for me it was pretty difficult to choose also because I was not too familiar with what the terminology meant and what you could and most importantly could not do unless you actually tried it. It would definitely have helped to be really crisp on what I really wanted, but I wasn't sure at the time.
+</p>
+
+<p>
+  I decided to try with the web hosting solution provided by my name registrar (Network Solutions) because it offered blogging and 'Servlet' support. After giving it a shot for a while, I realized that 'Servlet' support is really a joke. First of all, finding documentation for it was a big challenge. But once I was able to experiment with it, it became clear that it was going nowhere: the only thing you could do is literally create a <code>Servlet</code> (= a class) and drop it in their web container... You just cannot deploy a war, so as a result you cannot have any dependency on anything that is not already in the container. Very very limited in what you can actually do.
+</p>
+
+<p>
+  The second one I tried was <em>Oxxus.net</em>. They offer your own private container which you can start and stop at will. They have different kinds of web hosting, some of them including blog, but the one that offers tomcat does not offer blog. It was not too much of an issue since you can install a blog application in tomcat (the blog you are currently reading is running on <a href="http://roller.apache.org/">Apache Roller</a> within tomcat :) ). What really ticked me off is how lax they were with security. First of all, the very first email they sent me after registration contained passwords in clear in the body (and we all know how secure email is...). Although not a very good practice,  it is not too much of an issue if you can just change them yourself, which I did. To be able to use <code>scp</code> or <code>sftp</code>, they told me to login on their website with elevated privileges (as a non chroot jailed user) and to my surprise to do that I needed to use the same password that they had sent me earlier on, even after I had changed it on the website. In other words, they have a 'backdoor' which is totally accessible with passwords sent in clear that you cannot change... that was enough for me.
+</p>
+
+<p>
+  Finally the one I settled with and the one currently running this blog is <a href="http://rimuhosting.com/">RimuHosting</a> (I found a lot of good comments on the web about them). I was very impressed right away by how much they care about security and how good their documentation is. Just check out their <a href="http://rimuhosting.com/support/howtolist.jsp">HowTo</a> section and you will understand what I am talking about. What I have now is my own private VPS (Virtual Private Server). So I can do whatever I want on it. Install and run whatever kind of program. No restrictions. I must admit that I was a little bit afraid at first to have to manage a full blown OS since I am not a system administrator. Nonetheless, with the help of their very down to earth documentation and the <a href="http://www.webmin.com/">Webmin</a> interface, it turned out to be not a problem at all. Their support is very good too and they can help you set up whatever you want. I am currently very satisfied with this choice.
+</p>
+
+<p>
+  I investigated AWS (Amazon Web Services) but it is definitely a more expensive solution if you want to have a server up and running all the time (it costs 10c an hour... hence about $70 a month if you run it all the time). I think it is more suited if you can bring it up and down whenever you want to use it, but not if you want to run a blog or an email server which have to be up 100% of the time.
+</p>
+
+<p>
+  I recently bought another domain name for my product and this time I went with a company called <a href="http://www.gandi.net/">Gandi</a>. They were recommended by RimuHosting and they offer the same privacy protection offered by Network Solutions, except for free...
+</p>
+
+<p>
+  As a conclusion, to be fair to the companies that I have tried for web hosting, they all offered a 30 day money back guarantee. And it really works! I had no problem getting my money back. So I think it is ok to experiment if you don't know too much what will work for you and what will not. Usually it does not take that long to figure out whether you are happy or not.
+</p>

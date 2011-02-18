@@ -1,0 +1,93 @@
+
+---
+layout: post
+title: Automating publishing to maven central via Sonatype
+category: java
+tags:
+  - maven
+  - groovy
+  - java
+  - gradle
+---
+After releasing several <a href="https://www.github.com/linkedin">open-source projects</a> which are not using maven for the build framework (they use <a href="http://gradle.org/">gradle</a>), I was faced with the harsh reality that if you don't use maven, it is pretty hard to automate the process. The current version of gradle allows you to upload to a maven compatible repo, but to upload to maven central there are some constraints (like pgp signing) that gradle does not (currently) support.
+
+In order to publish your artifacts to maven central via Sonatype (unclear if there is another way to be honest), you need to follow the <a href="https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide">instructions</a> on how to set it up (you need to create a <a href="https://issues.sonatype.org/browse/OSSRH">Jira Ticket</a>). You also need to have a pgp key and if you don't, you can follow these <a href="http://www.sonatype.com/people/2010/01/how-to-generate-pgp-signatures-with-maven/">instructions</a>.
+
+Using gradle, you can simply create a maven compatible layout of your artifacts:
+<pre>
+// example for one of my project
+uploadArchives {
+  repositories {
+   mavenDeployer {
+    repository(url: "file://localhost/my/local/repo")
+    pom.whenConfigured { pomToConfigure ->
+      pomToConfigure.project {
+        name project.name
+        description 'A useful set of gradle plugins'
+        url 'http://github.com/linkedin/gradle-plugins'
+        licenses {
+          license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0'
+          }
+        }
+        developers {
+          developer {
+            id 'ypujante'
+            name 'Yan Pujante'
+            email 'yan@pongasoft.com'
+          }
+        }
+        scm {
+          connection "scm:git:${spec.scmUrl}"
+          developerConnection "scm:git:${spec.scmUrl}"
+          url spec.scmUrl
+        }
+      }
+    }
+  }
+}
+</pre>
+
+Note that a big part of the previous code is setting up the right information in the pom file to comply with the set of <a href="https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-6.CentralSyncRequirement">requirements</a>. Also note that you do <b>not</b> need to use gradle at all as long as you generate a maven compatible layout (with pom files).
+
+You can then use the script I have 'gisted' on github: <a href="https://gist.github.com/708980">maven_staging_upload.groovy</a>. The script simply takes the pom files you want to upload as an input and will prompt you for your pgp passphrase only once! Make sure you follow the initial setup:
+<pre>
+/**
+ * This script uploads all your artifacts to maven.
+ * 
+ * To run this script there are several asumptions:
+ * - gpg is installed and available in the path
+ * - you have followed the instructions to set up your pgp key
+ *   (http://www.sonatype.com/people/2010/01/how-to-generate-pgp-signatures-with-maven/)
+ * - maven is installed and available in the path
+ * - you have defined the proper server section in your ~/.m2/settings.xml file:
+ *   &lt;settings&gt;
+ *    ...
+ *    &lt;servers&gt;
+ *       &lt;server&gt;
+ *        &lt;id&gt;nexus-releases&lt;/id&gt;
+ *        &lt;username&gt;ypujante&lt;/username&gt;
+ *        &lt;password&gt;********&lt;/password&gt;
+ *       &lt;/server&gt;
+ *     &lt;/servers&gt;
+ *    ...
+ *   &lt;/settings&gt;
+ *
+ * You run the script this way: groovy maven_staging_upload.groovy pathToPomFile1 pathToPomFile2...
+ *
+ * groovy
+ */
+</pre>
+
+You then need to login to <a href="https://oss.sonatype.org/index.html#welcome">Nexus</a> to verify that the upload worked properly. You can then close the staging repository and release it. It will make its way to maven central shortly. The very first time, you need to <a href="https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-9.ActivateCentralSync">activate central sync</a>!
+
+I guess it is not fully automated as you still need to manually close/release the staging repository but the painful part (the part about uploading the artifacts to staging) is fully automated thanks to gradle and the script.
+
+You can use the <a href="https://github.com/linkedin/gradle-plugins">gradle plugins</a> that I open sourced to help with the release: the <code>org.linkedin.repository</code> and <code>org.linkedin.release</code> plugin can simplify your build code (for example the plugin takes care of the javadoc and sources requirements).
+
+Note that this script can be used totally independently of gradle and you do not need to use gradle to use it!
+
+Thanks to Jakub Holy for this <a href="http://theholyjava.wordpress.com/2010/02/07/releasing-a-project-to-maven-centr/">blog post</a> which helped me in understanding the steps I needed to follow in order to automate them.
+
+I am also hopeful that the 1.0 release of gradle will render my script obsolete!

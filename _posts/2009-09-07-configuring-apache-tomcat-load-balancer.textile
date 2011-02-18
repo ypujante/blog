@@ -1,0 +1,116 @@
+
+---
+layout: post
+title: Configuring apache -> tomcat load balancer
+category: java
+---
+Now that <a href="http://www.kiwidoc.com">kiwidoc</a> has been released, I can share my experience on how I configured the system in 'production'. <a href="http://www.kiwidoc.com">kiwidoc</a> is hosted at <a href="http://www.rackspacecloud.com/">rackspace</a> on 2 machines. A small one for the load balancer (<a href="http://httpd.apache.org/">apache web server</a>) and a bigger one for the main application (<a href="http://tomcat.apache.org/">tomcat</a>). Configuring it was quite a challenge and I just want to share how I did it. Note that the instructions are for Ubuntu 9.0.4 with a stock installation of apache (2.2.11-2ubuntu2.3) and tomcat (6.0.18-0ubuntu6) using the standard <tt>apt*</tt> commands.
+
+<h3>What did I want to achieve ?</h3>
+My main application is a web application and is deployed in tomcat under <tt>[/java]</tt>. The load balancer (apache) should be able to direct traffic to multiple instances of tomcat when the need arises. I also wanted <tt>http://www.kiwidoc.com/</tt> (in other word <tt>[/]</tt>) to be redirected to <tt>[/java/]</tt> which is my main entry point. The catch is that there are some pages that need to be served by apache (like some error pages) and this was not easy to configure.
+
+<h3>Configuring tomcat (Part I)</h3>
+On the tomcat side, I setup a new connector for <a href="http://tomcat.apache.org/tomcat-6.0-doc/connectors.html">ajp</a> (file <tt>/etc/tomcat6/server.xml</tt>):
+<pre>
+&lt!-- Define an AJP 1.3 Connector on port 8009 --&gt;
+&lt;Connector port="8009" protocol="AJP/1.3" redirectPort="8010" 
+           proxyname="www.kiwidoc.com" proxyPort="80" URIEncoding="UTF-8"/&gt;
+</pre>
+I chose ajp because it is supposed to be much faster than standard http. So far the configuration is not too difficult. <tt>proxyname</tt> and <tt>proxyport</tt> are used so that the methods <a href="http://www.kiwidoc.com/java/l/p/javax.servlet/servlet-api/2.5/p/javax.servlet/c/ServletRequest#getRemoteHost%28%29">ServletRequest.getRemoteHost()</a> and <a href="http://www.kiwidoc.com/java/l/p/javax.servlet/servlet-api/2.5/p/javax.servlet/c/ServletRequest#getRemotePort%28%29">ServletRequest.getRemotePort()</a> return the correct value.
+
+<h3>Configuring apache</h3>
+On the apache side, I added the 4 modules (directory <tt>/etc/apache2/mods-enabled</tt>):
+<pre>
+proxy_ajp.load      -&gt; ../mods-available/proxy_ajp.load
+proxy.load          -&gt; ../mods-available/proxy.load
+proxy.conf          -&gt; ../mods-available/proxy.conf
+proxy_balancer.load -&gt; ../mods-available/proxy_balancer.load
+</pre>
+
+Then under <tt>/etc/apache2/sites-enabled</tt>, I have the following file (which I called <tt>100-lb</tt>):
+
+<pre>
+&lt;VirtualHost *:80&gt;
+##########################
+# DocumentRoot
+DocumentRoot /var/www
+&lt;Directory /var/www/&gt;
+  Options FollowSymLinks MultiViews
+  AllowOverride None
+  Order allow,deny
+  allow from all
+&lt;/Directory&gt;
+##########################
+# Error handling
+ErrorLog /var/log/apache2/error.log
+LogLevel warn
+CustomLog /var/log/apache2/access.log combined
+ErrorDocument 503 /errors/error_503.html
+ErrorDocument 404 /errors/error_404.html
+##########################
+# Proxy
+ProxyRequests Off
+&lt;Proxy *&gt;
+  Order deny,allow
+  Allow from all
+&lt;/Proxy&gt;
+&lt;Proxy balancer://kiwidoc&gt;
+  BalancerMember ajp://123.123.123.123:8009
+  BalancerMember ajp://123.123.123.124:8009
+&lt;/Proxy&gt;
+ProxyPass /errors !
+ProxyPass /images !
+ProxyPass / balancer://kiwidoc/
+&lt;/VirtualHost&gt;
+</pre>
+
+Let's cover each section:
+<li>The 'Document Root' section defines where to find the static html on the file system (<tt>/var/www</tt> is the standard by default).</li>
+<li>The 'Error handling' section defines where the log goes and assigns the 503 and 404 error codes to static html pages that I have created and saved under <tt>/var/www/errors</tt>. I will explain why I did it this way.</li>
+<li>The 'Proxy' section configures the proxy. Note that it is ok to have only one member. The last 3 lines defines the rules for load balancing:
+<ul>
+<li>The first 2 lines define an exclusion rule: all requests to <tt>[/errors]</tt> and <tt>[/images]</tt> will be served by apache and not forwarded (this is required due to the 3rd line).</li>
+<li>The last line send all traffic to <tt>[/]</tt> to the balancer.</li>
+</ul>
+</li>
+
+The reason why I need to have some pages served by apache is 2 fold:
+<ol>
+<li>The static content should be served by apache (which does it very efficiently).</li>
+<li>If all tomcat instances are unreachable, then apache will issue a 503 error code, which gets mapped to <tt>[/errors/error_503.html]</tt> and without the exclusion rule, it would try to go to tomcat (which we know is unreachable...). This use case happens for example when I need to shutdown the main application for maintenance: you see a nice maintenance page.</li>
+</ol>
+
+<h3>Configuring tomcat (Part II)</h3>
+We are almost there. The issue now is that <tt>[/]</tt> goes to tomcat which needs to handle it properly. So here is what I did:
+
+<p>
+Under <tt>/var/lib/tomcat6/webapps/ROOT</tt> (which is what tomcat uses for <tt>[/]</tt>), I have a mini webapp:
+<pre>
+WEB-INF/web.xml
+---------------
+&lt;web-app xsi:schemaLocation='http://java.sun.com/xml/ns/j2ee 
+                 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd'
+         version='2.4' 
+         xmlns='http://java.sun.com/xml/ns/j2ee'
+         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'&gt;
+&lt;error-page&gt;
+  &lt;error-code&gt;404&lt;/error-code&gt;
+  &lt;location&gt;/errors/error_404.html&lt;/location&gt;
+&lt;/error-page&gt;
+&lt;/web-app&gt;
+
+index.jsp
+---------
+&lt;% response.sendRedirect("http://www.kiwidoc.com/java/"); %&gt;
+
+errors/error_404.html
+</pre>
+</p>
+
+Let's cover each section:
+<li>The <tt>web.xml</tt> is required to define a nice 404 error page: the main application (under <tt>[/java]</tt>) already handles 404 errors nicely, but a request to </tt>[/donotexist]</tt> for example, is going to be handled by the ROOT webapp and I wanted the same error page.
+</li>
+<li>The <tt>index.jsp</tt> page simply does the redirect and is served automatically by tomcat with no other configuration.</li>
+
+<h3>Conclusion</h3>
+First of all, it works, achieves what I described early on and I believe it covers all cases like maintenance mode and 'not found' error pages. Nonetheless I wish I had found a cleaner/simpler way to do that or in other words, to not have to create a ROOT webapp on the tomcat side. The main issue stems from the fact that I was totally unable to express in apache the simple rule: redirect <tt>[/]</tt> <b>ONLY</b> to <tt>[/java/]</tt> because using the <tt>[/]</tt> rule is treated as <tt>[/*]</tt>. I would be surprised if it was not possible, it is just very hard to find the documentation that explains how to do it.

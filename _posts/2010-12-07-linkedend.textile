@@ -1,0 +1,79 @@
+
+---
+layout: post
+title: LinkedEnd...
+category: misc
+tags:
+  - linkedin
+---
+When I look at <a href="http://www.linkedin.com/company/1337">LinkedIn's company page</a> as of December 2010, I can see that the company has now 1000+ employees spread all around the world.
+
+<p>
+When I started at LinkedIn, 8 years ago, there wasn't such a page to give me information about LinkedIn. LinkedIn simply did not exist. Period. 
+
+<a href="http://www.youtube.com/watch?v=bkQI5ZuGuEU"><img src="http://www.pongasoft.com/blog/yan/resource/_InBear.jpg" alt="InBear.jpg" border="0" width="198" height="148" style="float:right;"/></a>
+
+<p>
+Looking back, this is the true American Dream/Silicon Valley-garage-startup deal! Of course we did not really work in a garage. We started meeting in <a href="http://www.linkedin.com/in/reid">Reid</a>'s apartment in downtown Mountain View (CA) with a <a href="http://www.linkedin.com/static?key=founders">handful of people</a>. We had no office. We did not even have a name for the company (I am so glad we did not pick 'getin.com' which was on the shortlist!)
+
+<p>
+We just started from there and worked really hard. Official launch date was Cinco de Mayo 2003. The rest is history.
+
+<div style="clear:both;margin-top:2em;">
+Fast forward 8 years later. I have decided to leave. It is never an easy decision after all these years but I leave happy and extremely proud of what I have been able to accomplish at LinkedIn. I am not going anywhere, just taking some time off, for a little while. I have various projects that I will continue working on like my own website <a href="http://www.kiwidoc.com">kiwidoc</a> or the <a href="http://www.github.com/linkedin">open source projects</a> I just released. But more importantly, I also want to relax and enjoy life.
+</div>
+
+<h3>My most favorite projects</h3>
+Throughout my career at LinkedIn, I have had the chance to work on a wide variety of projects. Here is a compilation of the ones that matter the most to me, either because they were particularly challenging or simply because they were solid building blocks on which a lot of the infrastructure was built.
+
+<ul>
+<li>
+Resource framework: an easily extensible framework which hides the location of resources (files) no matter where they are located (local filesystem, in a local jar file, in a remote jar file, within the servlet context, on the classpath, in multiple locations...). This framework is part of the <a href="http://www.github.com/linkedin/linkedin-utils">linkedin-utils</a> open source effort (<a href="http://www.kiwidoc.com/java/l/p/org.linkedin/org.linkedin.util-core/1.0.0/p/org.linkedin.util.io.resource">javadoc</a>, <a href="https://github.com/linkedin/linkedin-utils">source</a>). #java
+</li>
+<li>
+jsp20 / EL compiler: a highly efficient implementation of jsp20 and expression language from the ground up (uses Resource framework for easy development and centralized deployment) used at LinkedIn for generating the html. #java, #javacc, #compiler
+</li>
+<li>
+UI Framework: the framework used by the frontend applications to deal with forms and requests. #java
+</li>
+<li>
+<a href="http://slidesha.re/cOc4R0">LinkedIn Spring</a>: built on top of Spring Framework 2.5 to support the notion of components (concept of nested beans). The core of the wiring system used at LinkedIn. #java, #spring
+</li>
+<li>
+GoBack framework: a framework that manages the concept of go back in a web application (after following a flow of several screens, you complete an action which brings you back to where you started, no matter where the starting point was) used on the website. #java
+</li>
+<li>
+Databus: a highly scalable database replication system which also offers an event based interface used for event propagation and replication in LinkedIn's infrastructure. #java, #jdbc
+</li>
+<li>
+Cloud Server: the initial scaleable implementation of the graph engine powering LinkedIn. #java, #graph
+</li>
+<li>
+Search Engine: the initial scaleable implementation of the search engine powering LinkedIn. #java, #lucene
+</li>
+<li>
+Comm system: initial design and prototype of the comm/inbox system. #ruby
+</li>
+<li>
+i18n profile: a massive effort to handle extensible profiles and internationalization. #java, #i18n
+</li>
+<li>
+<a href="http://www.softwaresummit.com/2008/speakers/presentations/PujanteSecurity2.0.pdf">Authentication server</a>: design and implementation of the authentication server used for security at LinkedIn. #java, #security
+</li>
+<li>
+Payment System: initial design and implementation of the payment system which processes the credit card transactions. #java, #jms, #castor
+</li>
+<li>
+<a href="http://slidesha.re/ddoHa4">OSGi investigations</a>: investigations and prototyping of an OSGi based infrastructure. #osgi
+</li>
+<li>
+Media server: design of the media server, the server which processes and delivers the pictures (and other media) on the website. #java
+</li>
+<li>
+glu: the deployment automation platform used at LinkedIn to provision (efficiently and in parallel) the services on multiple data centers that comprise the LinkedIn system. This project is now <a href="http://www.github.com/linkedin/glu">open source</a>. #java, #groovy, #rest, #zookeeper, #grails, #devops
+</li>
+<li>and many many more...</li>
+</ul>
+
+<h3>Conclusion</h3>
+A friend of mine was pointing out that I am no longer a LinkedIn employee, but I will always remain a LinkedIn co-founder, associated for the rest of my life to this amazing experience. I am extremely grateful to all the people that were (and still are) involved in this dream, because without them, it would not have been possible.

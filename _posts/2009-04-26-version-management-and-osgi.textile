@@ -1,0 +1,108 @@
+
+---
+layout: post
+title: Version Management and OSGi
+category: OSGi
+tags:
+  - osgi
+---
+<p>
+On this previous <a href="http://blog.linkedin.com/2009/02/17/osgi-at-linkedin-bundle-repositories/">post</a> on the <a href="http://blog.linkedin.com/?s=OSGi">LinkedIn blog</a>, I talked about bundle repositories. In this one I am going to cover version management and the particularities of OSGi.
+</p>
+
+<h3>How dows OSGi handle version ?</h3>
+In OSGi you define your dependencies using headers in the Manifest. There are several ways to define dependencies (<code>Import-Package</code>, <code>Require-Bundle</code>, etc...). One way to constrain a dependency is to use version. A version in OSGi is defined as <code>Major.Minor.Micro.qualifer</code>.
+<h4>Example of versions:</h4>
+<pre>
+1
+1.0
+2.4.5.ABC_DEF</pre>
+
+<ul>
+<li>Major, Minor and Micro must be numbers. The qualifier is a string (with some constraints) and is not interpreted as a number (check the <a href="http://www.osgi.org/javadoc/r4v41/org/osgi/framework/Version.html#Version(java.lang.String)">javadoc</a> for the details).OSGi does not attach any more meaning to the numbers and it is up to the user to manage the numbers the way they want.</li>
+<li>When defining a dependency, you can use a version or a version range.</li>
+</ul>
+
+<div style="border: dashed thin #ffcd00; padding:10px"><img src="http://www.pongasoft.com/blog/yan/resource/_warning_21x21.gif" alt="warning_21x21.gif" border="0" width="21" height="21" />
+Counter intuitively, defining:
+<pre>version=1.0.0</pre>
+<p>does not mean that you depend on version 1.0.0, but it means that you depend on 1.0.0+ meaning anything greater than (or equal to) 1.0.0 will match!</p>
+
+<p>If you really want to express that you depend on 1.0.0 and nothing else, it is expressed this way:</p>
+<pre>version=[1.0.0,1.0.0]</pre>
+</div>
+
+<h4>Example of ranges:</h4>
+<pre>
+version=1         => means          v &gt;= 1.0.0
+version=[1.1.0,2) => means 1.1.0 &lt;= v &lt; 2.0.0
+version=(1,2]     => means 1.0.0 &lt;  v &lt;= 2.0.0</pre>
+
+<h3>Versionning convention</h3>
+<p>As mentionned previously, OSGi does not attach any meaning to the various components of a version. Here is the convention that seems to have been adopted by some open source projects.</p>
+
+<ul>
+	<li>The Major number represents a major version: it is assumed that there is no backward compatibility between 2 different versions of the same bundle where the major number is different. Usually it means that APIs have changed in a non compatible way. (It would for example be the case if java serialized objects have been changed in a way that their serial version ID is different).</li>
+	<li>The Minor number represents a version which contains changes that are backward compatible. A backward compatible change is for example, the addition of a method to an interface or new classes and objects not present in a previous version.</li>
+	<li>The Micro number represents a version which is also backward compatible but does not contain any api enhancements. It is usually used for bug fixes and minor improvements.</li>
+	<li>The qualifier is a string and is being used for various purposes depending on the project.</li>
+</ul>
+
+
+<h3>Upgrading version</h3>
+<p>Let's take the following example:</p>
+<div align="center"><img src="http://www.pongasoft.com/blog/yan/resource/OSGi_Version3.0.0.png" alt="Version3.0.0.png" border="0" width="375" height="368" /></div>
+
+<p>There is a service which is exposed as a java interface. This java interface resides in the bundle <tt>api-3.0.0</tt>. A service does not really have a version but since it uses this api it is fair to say that the version of the service is 3.0.0. The bundle <tt>impl-3.0.2</tt> provides the implementation of the service and exports it to the OSGi registry. There are 2 clients of the service (client1 and client2). They both depend on the api. Also there is another external bundle (called <tt>lib-2.0.0</tt>) which happens to be used by both clients both directly (in their code) and indirectly because the api exposes some objects from this library in the api.</p>
+
+<pre>
+Service API (3.0.0)
+-------------------
+void f(FromLib200 param1);</pre>
+
+
+<h4>Upgrade scenario</h4>
+<p>Lets now assume we enhance the service in a backward compatible way by offering a new api (new method on the java interface).</p>
+<pre>
+Service API (3.1.0)
+-------------------
+void f(FromLib200 param1);
+void g(FromLib210 param1);</pre>
+
+<p>The new service API actually uses a new class which was not defined in the previous version of lib, thus requiring a new <tt>lib-2.1.0</tt>. We then assume that client1 uses this new enhanced api while client2 is left unchanged. Of course there needs to be a new implementation for this new api.</p>
+
+<h4>Upgrade results with minimal version lockdown</h4>
+<p>In this first case, we are assuming that we lockdown version only for protecting against incompatible changes. In other words we use ranges like this, locking down only on the major version number:</p>
+
+<pre>client1: api;version=[3.1.0,4),lib;version=[2.1.0,3)
+client2: api;version=[3.0.0,4),lib;version=[2.0.0,3)
+api-3.0.0: lib;version=[2.0.0,3)
+api-3.1.0: lib;version=[2.1.0,3)</pre>
+
+<p>Here is the result:</p>
+<div align="center"><img src="http://www.pongasoft.com/blog/yan/resource/OSGi_Version3.1.0_min_lockdown.png" alt="Version3.1.0_min_lockdown.png" border="0" width="427" height="368" /></div>
+<p>
+Although client1 has not been updated, it is going to start using the new service. Since the new service is backward compatible it is not really an issue per se. What is an issue though is that it is also going to start using <tt>lib-2.1.0</tt>. Why is it an issue exactly ? In a very dynamic production environment (like LinkedIn's), this scenario is very frequent. The danger comes from the fact that by simply deploying a new version of a service, it ends up affecting a client in a way that has most likely not being tested.</p>
+
+<h3>Upgrade results with maximal version lockdown</h3>
+<p>In this second case, we are assuming that we lockdown the version entirely. In other words we use ranges like this, locking down major, minor and micro:</p>
+<pre class="code-none">client1: api;version=[3.1.0,3.1.1),lib;version=[2.1.0,2.1.1)
+client2: api;version=[3.0.0,3.0.1),lib;version=[2.0.0,2.0.1)
+api-3.0.0: lib;version=[2.0.0,2.0.1)
+api-3.1.0: lib;version=[2.1.0,2.1.1)</pre>
+<p>Here is the result:</p>
+<div align="center"><img src="http://www.pongasoft.com/blog/yan/resource/OSGi_Version3.1.0_max_lockdown.png" alt="Version3.1.0_max_lockdown.png" border="0" width="427" height="396" /></div>
+
+<p>
+<div style="border: dashed thin #ffcd00; padding:10px"><img src="http://www.pongasoft.com/blog/yan/resource/_warning_21x21.gif" alt="warning_21x21.gif" border="0" width="21" height="21" />
+In this scenario, client1 is fine, but client2 is not: due to the way class loading happens, client2 cannot see the new service.</div>
+</p>
+
+<h3>Is there a solution then ?</h3>
+<p>As we mentionned previously, client2 should be able to talk to the new service because it is backward compatible. The only reason it cannot talk to it is due to class loading. If we were in separate containers we would not really have this problem (we would use spring rpc which does java serialization). So the idea is to replicate what happens when we are remote:</p>
+<div align="center"><img src="http://www.pongasoft.com/blog/yan/resource/OSGi_Version3.1.0_max_lockdown2.png" alt="Version3.1.0_max_lockdown2.png" border="0" width="555" height="387" /></div>
+
+<p>We can deploy a service which uses service 3.0.0 api and proxies all the call to the real service (we know that due to backward compatibility, the API of Service 3.0.0 is a subset of 3.1.0 so we should be able to proxy all calls). Due to class loading issues, the calls must go through java serialization (exactly like what would happen if it was remote...): in other words, we serialize all parameters with the class loader which loaded Service 3.0.0 and we deserialize with the one which loaded Service 3.1.0 (and vice versa for the return value/exceptions).</p>
+
+<h2>Conclusion</h2>
+Solution 2 is not going to work. The choice is then between Solution 1 and 3. Solution 3 is not supported out of the box by OSGi and requires writing the proxy and the mechanisms to do the serialization / class loader transfer which is not necessarily an easy piece of code to write. Solution 1 is most likely the one that is going to be used in the end, and it is fine, as long as we are careful and aware of the 'dangers' of deploying more than one service in the same container. Distributed OSGi (RFC 119) is coming up and I think they will have to address some of the issues cross containers (the ability to upgrade a remote service to a newer backward compatible version without having to change the clients). So the point I was making is still valid: if it is going to work cross containers, it should also work in the same container (which is essentially Solution 3)...

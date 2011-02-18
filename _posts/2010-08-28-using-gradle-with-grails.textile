@@ -1,0 +1,87 @@
+
+---
+layout: post
+title: Using gradle with grails
+category: grails
+tags:
+  - grails
+  - gradle
+---
+I just recently migrated my entire <a href="http://www.kiwidoc.com/java">kiwidoc</a> project to use <a href="http://www.gradle.org/">gradle</a> for its build framework (replacing maven). The biggest challenge I faced in the exercise was to have grails work with gradle. I spent way too much time on this part due to my lack of deep knowledge of each framework but in the end it is extremely simple. The reason why it was challenging in the first place is that my project is a multi-project build as gradle calls it (see <a href="http://www.gradle.org/0.9-rc-1/docs/userguide/multi_project_builds.html">Chapter 36</a>). What I wanted was that my other projects be recompiled before starting grails to get the latest version.
+
+There are 2 ways you can go about it:
+
+<h4>1. Use the grails gradle plugin</h4>
+I actually opened a <a href="http://jira.codehaus.org/browse/GRAILS-6621">Jira Ticket</a> for this and within a couple of days there was already a solution out there. The details are on the jira ticket and on the <a href="http://github.com/grails/grails-gradle-plugin">github project</a>. Here is how you use it:
+
+<pre>
+// external plugin
+buildscript {
+  repositories {
+    mavenCentral()
+    mavenRepo urls: "http://repository.jboss.org/maven2/"
+  }
+
+  dependencies {
+    classpath "org.grails:grails-gradle-plugin:1.0",
+              "org.grails:grails-bootstrap:${grailsVersion}"
+  }
+}
+
+apply plugin: "grails"
+
+repositories {
+  mavenRepo urls: "http://repository.jboss.org/maven2/"
+}
+
+dependencies {
+  compile "org.grails:grails-crud:${grailsVersion}"
+  compile "org.grails:grails-gorm:${grailsVersion}"
+
+  compile project(':kiwidoc:com.pongasoft.kiwidoc.index.api')
+  compile project(':kiwidoc:com.pongasoft.kiwidoc.index.impl')
+  compile project(':kiwidoc:com.pongasoft.kiwidoc.builder')
+  compile project(':utils:util.html')
+
+  runtime 'org.slf4j:slf4j-log4j12:1.5.8'
+  runtime 'org.aspectj:aspectjrt:1.6.8'
+}
+</pre>
+
+<tt>grailsVersion</tt> is a variable defined in my 'root' build script (<tt>grailsVersion="1.3.4"</tt>). As can be seen on this short example, I have dependencies to my other projects built by gradle as well. Please note the extra dependency on aspectj due to an improper pom file :(.
+
+<h4>2. Use gradle to build the classpath</h4>
+Solution #1 works great but everything you do needs to go through gradle and it also downloads a new version of grails. So if you already have grails installed there is another solution:
+
+<pre>
+apply plugin: 'groovy'
+
+dependencies {
+  compile project(':kiwidoc:com.pongasoft.kiwidoc.index.api')
+  compile project(':kiwidoc:com.pongasoft.kiwidoc.index.impl')
+  compile project(':kiwidoc:com.pongasoft.kiwidoc.builder')
+  compile project(':utils:util.html')
+
+  groovy: 'org.codehaus.groovy:groovy:1.7.4'
+}
+
+task lib(dependsOn: jar) << {
+  fileTree(dir: 'lib').each { it.delete() }
+  copy {
+    from configurations.runtime
+    into 'lib'
+  }
+}
+
+['run-app', 'war'].each { taskName ->
+  task "${taskName}"(dependsOn: lib) << {
+    ant.exec(dir: '.', executable: "grails") {
+      arg(line: "${taskName}")
+    }
+  }
+}
+</pre>
+
+By declaring the <tt>lib</tt> task to depend on the <tt>jar</tt> task, the groovy plugin will automatically build my classpath which I copy in the <tt>lib</tt> folder that grails know about. I can then simply invoke the <tt>grails</tt> command line (which is assumed to be in your path). The beauty with this solution is you can simply run <tt>gradle lib</tt> and once you are done, you can go on the command line and simply run <tt>grails</tt> directly as now all the dependencies you need are where <tt>grails</tt> expects them.
+
+If you want to run the app with gradle, you need to use <tt>gradle -i run-app</tt> otherwise you won't see any of the messages that grails log.

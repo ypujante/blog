@@ -1,0 +1,65 @@
+
+---
+layout: post
+title: Indexing android 'froyo' javadoc in kiwidoc
+category: pongasoft
+tags:
+  - froyo
+  - javadoc
+  - kiwidoc
+  - android
+---
+I just indexed android 'froyo' javadoc in <a href="http://www.kiwidoc.com/java">kiwidoc</a> and it was quite a challenge.
+
+<h4>1. Downloading the source code</h4>
+You have to go to <a href="http://source.android.com/">http://source.android.com/</a> to find instructions on <a href="http://source.android.com/source/download.html">how to get it</a>. This part is actually quite challenging because there are lots of steps to simply 'get it'. I understand why it is being done this way: you end up with a ready to develop/contribute environment. On the other end, if you simply want to look at the source code it is quite complex and potentially time consuming.
+
+<h4>2. Downloading the 'correct' version of the source code</h4>
+I know it is written in the manual but it is not very intuitive to download the <em>correct</em> version. Under the cover, it uses <code>git</code> but it is wrapped by a high level command called <code>repo</code>. When you use plain <code>git</code> in a project, you simply clone the project and then you can switch to a branch. When you use the <code>repo</code> command, you end up with an error message if you try to follow the <code>git</code> paradigm.
+<pre>
+> repo branches
+   (no branches)
+> repo checkout froyo
+error: no project has branch froyo
+</pre>
+It is very important to 'clone' with the correct version originally:
+<pre>
+repo init -u git://android.git.kernel.org/platform/manifest.git -b froyo 
+</pre>
+I am sure there are very good reasons to do it this way, but it would certainly be easier if the command were to behave like <code>git</code>.
+
+<h4>3. Compiling android</h4>
+I use a Mac OS X machine (Snow Leopard) and bumped into a lot of issues:
+<ul>
+<li>Snow Leopard is not supported</li>
+<li>It requires a case-sensitive file system (which is not the default on Mac OS X)</li>
+<li>It requires Java 1.5 (which is eol now...)</li>
+</ul>
+Thankfully I had an old drive with Leopard on it and was able to eventually compile it using this version of the OS and creating a case-sensitive partition.
+
+<h4>4. Make</h4>
+For my own purpose I actually only needed the javadoc and the java source code. After running a full build (I just issued the <code>make</code> command) which took several hours to run (no kidding), there was no javadoc. Not being very familiar with <code>make</code>, it took me a while to figure out that you can run the command:
+<pre>
+make -p > android-make.db
+</pre>
+which &quot;<em>Print make's internal database</em>&quot;. In this case it generated a 156MB file! Sifting through this file, I was able to identify the command I needed:
+<pre>
+make offline-sdk-docs
+</pre>
+which generated the javadoc.
+
+<h4>5. kiwidoc generation</h4>
+By slightly tweaking the javadoc command in the make file, I was able to generate the information I needed for kiwidoc: mainly all the source files to take into account as well as the classpath. Once I had this information, actually indexing it tooks 20s.
+
+<h4>6. Android versions</h4>
+I think that the android version naming, although I understand why it is being done this way, is quite confusing:
+<ul>
+<li>Platform version (2.2 is the 'current' latest one)
+<li>API Level (8 is the 'current' latest one)</li>
+<li>Code Name (froyo is the 'current' latest one)</li>
+</ul>
+Code names are cool but it make it very hard to remember to which actual version they tie to: the <a href="http://developer.android.com/guide/appendix/api-levels.html">Android API Levels</a> page does not even mention codenames (so how do you know which version is 'eclair' for example ?).  In <a href="http://www.kiwidoc.com/java">kiwidoc</a>, I chose to use the api level as the version of the library because it is what reflects what you program against: there could be a new platform version (ex: 2.2.1) without a change in api level. What matters from an application developer point of view is the api level.
+
+<h4>7. Conclusion</h4>
+It took me a really long time to index <a href="http://www.kiwidoc.com/java/l/p/android/android/8">froyo (api level 8)</a> but I succeeded which is very satisfying. I also 'promoted' the android platform all the way to the <a href="http://www.kiwidoc.com/java">home page</a>.
+

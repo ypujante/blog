@@ -1,0 +1,217 @@
+
+---
+layout: post
+title: ZooKeeper loss of events problem... fixed
+category: java
+tags:
+  - zookeeper
+  - groovy
+  - java
+---
+In my latest project at LinkedIn, I have been using <a href="http://hadoop.apache.org/zookeeper/">ZooKeeper</a> to track the state of all deployed services on every machine in production. The state is then used to drive the deployment as well as monitor the system.
+
+I ran into a really tricky bug which took me several months to address (the hardest part was finding what the actual problem was).
+
+The (simplified) code was the following:
+
+<pre>ZooKeeper zk = ...
+Map<String, byte[]> state = [:]
+
+synchronized(lock) { state = trackChildren(state) }
+
+// handle add/delete of children
+private Map trackChildren(Map oldState) {
+  def newState = new HashMap()
+  def children = zk.getChildren('/state', childrenWatcher as Watcher)
+  children.each { child -> 
+    if(oldState[child] == null) // ADD
+      trackChild(newState, "/state/${child}")
+    } else { 
+      newState[child] = oldState[child] // no change
+    }
+  }
+  // DELETE: newState does not contain the children that have disappeared
+  return newState
+}
+
+// handle child update
+private void trackChild(Map newState, String path)
+{
+  if(path == null) return
+  def child = new File(path).name
+  try { newState[child] = zk.getData(path, childWatcher as Watcher, null) }
+  catch(NoNodeException e) {  /* ok node is gone */ newState.remove(child) }
+}
+
+def childrenWatcher = { WatchedEvent event -> 
+  if(event.type == EventType.NodeChildrenChanged) {
+    synchronized(lock) { state = trackChildren(state) }
+  }
+}
+
+def childWatcher = { WatchedEvent event -> 
+  def child = event.path ? new File(event.path).name : null
+  synchronized(lock) {
+    if(event.type == EventType.NodeDataChanged) { 
+      trackChild(state, event.path)
+    }
+    if(event.type == NodeDeleted) { state.remove(child) }
+  }
+}</pre>
+
+What this code essentially does is the following: 
+<ul>
+ <li>Sets a children watcher on <tt>/state</tt> to be notified of children addition/deletion</li>
+ <li>For each child, sets a node watcher to be notified of child modification and deletion. Note that you need this watcher because ZooKeeper will not call the parent watcher when a child gets modified!</li>
+ <li>As a result, the map called <tt>state</tt> always contain a 'copy' of the data of all children.</li>
+</ul>
+
+From the ZooKeeper <a href="http://hadoop.apache.org/zookeeper/docs/r3.2.1/zookeeperProgrammers.html#ch_zkWatches">documentation</a>, there are some key concepts to remember about watches:
+<em>
+<ol>
+<li>Watches are one time triggers; if you get a watch event and you want to get notified of future changes, you must set another watch.</li>
+<li> Because watches are one time triggers and there is latency between getting the event and sending a new request to get a watch you cannot reliably see every change that happens to a node in ZooKeeper. Be prepared to handle the case where the znode changes multiple times between getting the event and setting the watch again. (You may not care, but at least realize it may happen.)</li>
+<li>A watch object, or function/context pair, will only be triggered once for a given notification. For example, if the same watch object is registered for an exists and a getData call for the same file and that file is then deleted, the watch object would only be invoked once with the deletion notification for the file.</li>
+</ol>
+</em>
+
+The code I wrote seems to handle #1 perfectly. On the other end, it does not handle #2 properly and this is where the bug gets triggered.
+
+I ran into a situation where a server would delete and rewrite the data very fast:
+<pre>
+byte[] child1State = ...
+zk.delete('/state/child1', -1)
+zk.setData('/state/child1', child1State, -1)
+</pre>
+
+In this scenario, I would receive 2 events:
+<ol>
+  <li><tt>/state</tt> childrenWatcher would be fired with a <tt>NodeChildrenChanged</tt> event. And the bug gets triggered here. According to key concept #2, essentially events can be collapsed: in this case I am getting only 1 <tt>NodeChildrenChanged</tt> event and when I list my children (<tt>getChildren</tt>), I actually see no difference: child1 has been removed and added, but I don't see it. I am effectively loosing the 'add' child event with the code written this way. </li>
+<li><tt>/state/child1</tt> childWatcher would we fired with a <tt>NodeDeleted</tt> event resulting in <tt>state.remove('child1')</tt>... at this point I have indeed lost the state of <tt>child1</tt>.</li>
+</ol>
+
+With the following code on the server side:
+<pre>
+byte[] child1State = ...
+zk.delete('/state/child1', -1)
+Thread.sleep(5000)
+zk.setData('/state/child1', child1State, -1)
+</pre>
+</li>
+I actually get 2 events and I have enough time to process them so it works. But that is clearly not the right fix.
+
+In order to fix the problem, I did 2 things:
+<ol>
+  <li>The children watcher is only dealing with 'ADDs' and does not handle 'DELETE' anymore</li>
+  <li>The child watcher handles 'DELETE' but also tries to set a watcher no matter what</li>
+</ol>
+
+<pre>ZooKeeper zk = ...
+Map<String, byte[]> state = [:]
+
+synchronized(lock) { state = trackChildren(state) }
+<span style="background: yellow; font-weight:bold;">
+// handle ADD only... let the children watcher handle DELETE
+private Map trackChildren(Map oldState) {
+  def newState = new HashMap(oldState)
+  def children = zk.getChildren('/state', childrenWatcher as Watcher)
+  children.each { child -> 
+    if(newState[child] == null) 
+      trackChild(newState, "/state/${child}")
+  }
+  return newState
+}</span>
+
+// handle child update
+private void trackChild(Map newState, String path)
+{
+  if(path == null) return
+  def child = new File(path).name
+  try { newState[child] = zk.getData(path, childWatcher as Watcher, null) }
+  catch(NoNodeException e) {  /* ok node is gone */ newState.remove(child) }
+}
+
+def childrenWatcher = { WatchedEvent event -> 
+  if(event.type == EventType.NodeChildrenChanged) {
+    synchronized(lock) { state = trackChildren(state) }
+  }
+}
+
+def childWatcher = { WatchedEvent event -> 
+  def child = event.path ? new File(event.path).name : null
+  synchronized(lock) {
+    if(event.type == EventType.NodeDataChanged) { trackChild(state, event.path) }
+    if(event.type == NodeDeleted) { 
+      state.remove(child)
+<span style="background: yellow;font-weight:bold;">      // WARNING!!! UNINTUITIVE BUT CRITICAL!!!
+      trackChild(state, event.path)</span>
+    }
+  }
+}</pre>
+
+The code (in the childWatcher) most likely looks very unintuitive, but what is really happening in this case, is that the child on which the watcher is set will always receive the <tt>NodeDeleted</tt> event and according to key concept #1, if you want to be able to receive further events you need to set another watcher. It seems unintuitive to set a watcher on a node that just got deleted (and most of the time it will trigger a <tt>NoNodeException</tt> which is handled properly), but between the time the node was deleted and the time you check, it may very well have been recreated in which case you guarantee that you will have a watcher set on it and you won't loose it. If the node was deleted and not recreated right away, then the childrenWatcher will be the one setting it up again in the future if it gets recreated (pay close attention to the synchronization in the code as it is pretty critical for the system to work properly). Here is an example:
+
+<ul>
+<li>/state/child1 simply deleted</li>
+<ul>
+<li>
+<ol>
+ <li><tt>childrenWatcher</tt> receives <tt>NodeChildrenChanged</tt> => does nothing</li>
+ <li><tt>childWatcher</tt> receives <tt>NodeDeleted</tt> => state.remove('child1')</li>
+</ol>
+</li>
+or
+<li>
+<ol>
+ <li><tt>childWatcher</tt> receives <tt>NodeDeleted</tt> => state.remove('child1')</li>
+ <li><tt>childrenWatcher</tt> receives <tt>NodeChildrenChanged</tt> => does nothing</li>
+</ol>
+</li>
+</ul>
+<li>/state/child1 deleted / recreated (events get collapsed)</li>
+<ul>
+<li>
+<ol>
+ <li><tt>childrenWatcher</tt> receives <tt>NodeChildrenChanged</tt> => does nothing</li>
+ <li><tt>childWatcher</tt> receives <tt>NodeDeleted</tt> => state.remove('child1') then state['child1']=new state + watcher</li>
+</ol>
+</li>
+or
+<li>
+<ol>
+ <li><tt>childWatcher</tt> receives <tt>NodeDeleted</tt> => state.remove('child1') then state['child1']=new state + watcher</li>
+ <li><tt>childrenWatcher</tt> receives <tt>NodeChildrenChanged</tt> => does nothing</li>
+</ol>
+</li>
+</ul>
+<li>/state/child1 deleted / recreated (events are not collapsed)</li>
+<ul>
+<li>
+<ol>
+ <li><tt>childrenWatcher</tt> receives <tt>NodeChildrenChanged</tt> => does nothing</li>
+ <li><tt>childWatcher</tt> receives <tt>NodeDeleted</tt> => state.remove('child1')</li>
+ <li><tt>childrenWatcher</tt> receives <tt>NodeChildrenChanged</tt> => state['child1']=new state + watcher </li>
+</ol>
+</li>
+or
+<li>
+<ol>
+ <li><tt>childWatcher</tt> receives <tt>NodeDeleted</tt> => state.remove('child1')</li>
+ <li><tt>childrenWatcher</tt> receives <tt>NodeChildrenChanged</tt> => state['child1']=new state + watcher </li>
+</ol>
+</li>
+or
+<li>
+<ol>
+ <li><tt>childrenWatcher</tt> receives <tt>NodeChildrenChanged</tt> => does nothing</li>
+ <li><tt>childWatcher</tt> receives <tt>NodeDeleted</tt> => state.remove('child1') then state['child1']=new state + watcher</li>
+ <li><tt>childrenWatcher</tt> receives <tt>NodeChildrenChanged</tt> => does nothing</li>
+</ol>
+</li>
+</ul>
+
+</ul>
+
+As always with this kind of problem, the fix is really not that complicated. It is understanding the problem in the first place which is hard...
+
+You can check the <a href="http://www.kiwidoc.com/java/l/p/org.apache.hadoop/zookeeper/3.2.1/p/org.apache.zookeeper/c/ZooKeeper">ZooKeeper javadoc</a> on kiwidoc :)

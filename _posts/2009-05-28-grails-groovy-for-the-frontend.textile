@@ -1,0 +1,68 @@
+
+---
+layout: post
+title: Grails/Groovy for the frontend
+category: grails
+tags:
+  - groovy
+  - grails
+---
+<p>When I started building my service, I knew I would have to choose a technology for the frontend. One of the big challenge is that there is a big number of available frameworks and languages to choose from: servlets + jsps, spring mvc, PHP, ruby on rails, grails, and many more including as a last resort to build my own. Each solution has their advantages and drawbacks. I think one of the big issue I am seeing in the choice is that it is hard (or at least costly) to switch from one to another once the choice has been made. Even if they are close to each other in concepts they each have their own ways of doing things (including the language, like PHP vs Grails/Groovy...). Also, depending on the technology, you get more or less: for example, Grails is much more than a UI framework with its powerful ORM layer (Object Relational Mapping).</p>
+
+<p>
+In the end, making the decision was not too difficult as I was able to come up with some boundaries and constraints:
+<ul>
+<li>
+Ability to talk to java back-end services (with extra bonus if I could collocate them at will in the same process).
+</li>
+<li>
+Fast development lifecycle
+</li>
+<li>
+Simplified access to the database
+</li>
+</ul>
+</p>
+
+<p>
+PHP has become very popular lately and although I was not afraid of learning a new language (after all, it was one of the goals of this project), it did not feel like it was satisfying all my constraints (note that I may be wrong due to my lack of deep knowledge of this technology). Rapidly, I narrowed it down to ROR (Ruby on Rails) and Grails. I believe both frameworks are very similar in concept, both offering very fast turnaround, scaffolding, ORM layer...
+</p>
+
+<p>
+My final decision to use Grails was motivated by the fact that the language used is Groovy and Groovy is java! So I knew I would not have too much trouble learning it and more importantly integrating with any java code or backend server would be a breeze. To bootstrap the process I read the two excellent books (which I strongly recommend): <a href="http://www.amazon.com/gp/product/1932394842?ie=UTF8&tag=pongasoft-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1932394842">Groovy in Action</a><img src="http://www.assoc-amazon.com/e/ir?t=pongasoft-20&l=as2&o=1&a=1932394842" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> and <a href="http://www.amazon.com/gp/product/1590599950?ie=UTF8&tag=pongasoft-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1590599950">The Definitive Guide to Grails, Second Edition</a><img src="http://www.assoc-amazon.com/e/ir?t=pongasoft-20&l=as2&o=1&a=1590599950" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+.
+</p>
+
+<p>
+After using Grails for several months, I am pretty happy with the choice. I have not used the ORM capabilities yet but I was able to successfully deploy my java backend services in the same VM (by wiring them directly in spring): the autowiring capabilities into the bootstrap sequence and the controllers made it a breeze. Working with controllers and gsp pages (equivalent to jsp for Grails) has been relatively painless and I certainly appreciate the ability to simply modify the source code and see the changes right away when refreshing the page in the browser (which satisfies the fast development lifecycle constraint). I really like the extensibility of the gsp layer by being able to write your own tag library (you can check my post about <a href="http://www.pongasoft.com/blog/yan/entry/grails_invoking_a_tag_lib">grails tag libraries</a>): it is pretty straightforward and very powerful.
+</p>
+
+<p>
+But in the end, the reason why I am really glad I made this choice is actually the Groovy language. I did not know it beforehand and I am very excited to add it to my toolbox. As I was mentioning before, Groovy is java. Groovy gets compiled into java and integrates seamlessly with it, which is huge for someone who knows java quite well. What it brings to java is big and when I go back to java, I always wish some of the features would be native to java: I love <a href="http://groovy.codehaus.org/Closures">closures</a>, <a href="http://en.wikipedia.org/wiki/Duck_typing">duck typing</a> and <a href="http://groovy.codehaus.org/Builders">builders</a> to name a few. Groovy allows you to be strongly typed if you want to, but unlike pure java, it is not enforced. There is always a battle between the two camps, but I prefer to be neutral and use whichever makes more sense in what I am currently working on.
+<pre>
+// small example showing how concise and efficient the syntax can be
+// duck typing in action: 
+// * this method will work on any object which has a method sort(Closure closure)
+// * as long as the elements in the list knows how to handle '.name' it will work 
+//   as well (which covers, properties, getters, and even maps (since map["name"] 
+//   can be written map.name!))
+static def sortByName(list)
+{
+  list.sort() { e1, e2 ->
+    return e1.name.compareTo(e2.name)
+  }
+}
+</pre>
+</p>
+<p>
+Since my initial exposure to Groovy through Grails, I have actually started using it in other areas:
+<ul>
+<li>
+For 'shell' scripts (which I used to write in bash, perl or python): you get all the power of java and groovy for writing small scripts so no need to switch to a totally different syntax.
+</li>
+<li>
+For testing: this is definitely an area where I really don't see any advantage in writing my unit tests in java anymore even if what I am testing is my java code. It is less code to write and it is more readable.
+</li>
+</ul>
+Of course, there are some areas where I will still remain in pure java, like for the CPU intensive backend services: Groovy adds some overhead and when you need the speed, it is better to remain in java. But for everything else, the ease of programming and the power of the language makes it a much more fun experience than coding the exact same thing in pure java.
+</p>

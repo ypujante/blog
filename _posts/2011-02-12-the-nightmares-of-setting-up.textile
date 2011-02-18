@@ -1,0 +1,63 @@
+
+---
+layout: post
+title: The nightmares of setting up a wireless N network
+category: misc
+---
+After converting the guest room into a second office, I was faced with a dilemma: the internet is in one office but of course both offices need to access the internet. My home is fairly recent and as a result, extremely well wired. The only catch is that it is wired for coax and phone jacks but not for cat5 (we don't even use land line phones anymore!).
+
+<p>
+We opted for upgrading our network to wireless N (it was G) so that my MacBook Air could benefit from it and my desktop could also get good throughput.
+
+<p>
+First nightmare: I now own an 'old' Mac Pro. It is a dual Xeon Quad-Core 2.8Ghz with 14GB of memory purchased in early 2008. The catch is that all 'new' Apple computers now come with wireless built-in including the Desktops. And of course Apple is not selling a wireless N card (or B or G for that matter): this is too cheap and really Apple would prefer you to buy a new Mac. A trip to my local Apple Store revealed totally clueless employees who clearly did not give a damn about the 'past' and the only thing they cared about was for you to buy a brand new machine because it comes with wireless built-in (why would you buy a $100 card when you can buy a $3000 brand new Mac ? Really ?).
+
+<p>
+In the end it is the traditional pattern: there are a ton of choices if you own a PC. But if you own a Mac and it is not Apple supported, it is really hard/impossible to find anything decent. You can pretty much count on your fingers the number of available options for the Mac. And when you start adding more constraints, like 5Ghz then the number of choices drops even further.
+
+<p>
+So the solution that we opted for was to install a dual-band wireless N router that would be connected to the internet in one office and a wireless N bridge (5Ghz) in the other office. That way the Mac is connected to the wireless network through ethernet, thus being transparent to the Mac.
+
+<p>
+Second nightmare: have you shopped lately for anything wireless N ? This is a freaking nightmare wrapped into layers of marketing bullshit. N600, extreme, gigabit, ultimate, 12x, 300Mbps... you name it. It is claim after claim of false advertising. I am not entirely sure how this is even legal. I would just like to remind DLink, Netgear, Cisco/Lynksis and others that the fastest you can go will always be limited by the slowest link in the chain. So when you claim that your devide goes up 300Mbps and the ethernet jack is regular ethernet (100Mbps), then really you can't go faster than 100! If you have tried to buy a digital camera it is the same kind of marketing bullshit with a meaningless race on the megapixel count.
+
+<p>
+From my experience, with all the devices I tried, the fastest I ever saw with the devices as close as possible to each other (touching each other antennas!) I could reach ~140Mbps...
+
+<p>
+In the process, we ended up trying 5 different devices! 
+
+<p>
+First the 3 we did not keep:
+
+<ul>
+<li>
+<a href="http://www.amazon.com/gp/product/B000LIFB7S?ie=UTF8&tag=pongasoft-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=B000LIFB7S">DLink DIR-855</a> which is a wireless N router with 4 gigabit ports. The major issue with this one was that the best reception I could get with my laptop touching the antenna was ~70%. Also the maximum transfer rate I ever saw was ~72Mbps in the best case scenario possible.
+</li>
+<li>
+<a href="http://www.amazon.com/gp/product/B001769K3O?ie=UTF8&tag=pongasoft-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=B001769K3O">DLink DAP-1522</a> which is a wireless N access point / bridge. This one has a serious issue: there is 1 page in the configuration menu (web based) which requires Internet Explorer to work. This is a very well known bug that has numerous people complaining about and it has been reported more than a year ago. DLink does not bother to fix it nor even change the text on the box or the web site still claiming it works for Windows and Mac with IE or Firefox. It is just a lie. It does not. Also during my experiments it seemed very flaky as it required many reboots.
+</li>
+<li>
+<a href="http://www.amazon.com/gp/product/B001QVQ7JU?ie=UTF8&tag=pongasoft-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=B001QVQ7JU">Cisco/Linksys WET610N</a> which is a dual band wireless N bridge. It is branded as a wireless gaming and video adapter but really it is bridge. The one I had was literally a piece of garbage (but to be fair I do not know if it was the unit I had that was defective or if it is really the way it works). The web based interface is slower than christmas with (I am not kidding!) a wait of over 10s to go from page to page! Not to change anything... just going from page to page! We had a really hard time to make it connect to the router and we finally changed the 5Ghz channel on the router and the bridge could finally see it (this is totally undocumented nor configurable in this device). Also the wizard would not accept our passphrase because it contains spaces (hello! a pass<em>phrase</em>!). We managed to make it connect to the router but for no more than 5s: it would constantly connect/disconnect over and over. Note that during this experiment, the device was literally touching the router so it could hardly be closer!
+</li>
+</ul>
+
+<p>
+Then the 2 we ended up keeping:
+<ul>
+<li>
+<a href="http://www.amazon.com/gp/product/B0049YQVHE?ie=UTF8&tag=pongasoft-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=B0049YQVHE">Asus RT-N56U</a> which is a dual band gigabit wireless N router. I know that it is supposed to look nice, but to be fair I prefer when it is more badass looking (I really like the blue Netgear switches with the connectors in the front :). This one is very impressive. The UI is actually really nice and it is a breath of fresh air. The same test done with the laptop sitting right next to it gave very different results: the reception was 98% and the transfer rate was ~140Mpbs. It also has 2 USB ports and we ended up buying a cheap 16GB USB key at Micro Center and plugging it directly in the router as our common storage. Very sweet and works like a charm. It has been working great since we had it. This one is highly recommended.
+</li>
+<li>
+<a href="http://www.amazon.com/gp/product/B001P817YO?ie=UTF8&tag=pongasoft-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=B001P817YO">DLink DAP-2553</a> which is a dual band access point but can also act as a bridge. This one is definitely more expensive and is in the business line so it is not as customer friendly. It definitely looks badass especially the antennas. Although not a customer oriented product, it was a million time easier to make it work than the stupid wireless gaming adapter! We simply selected to work as a bridge, entered the WPA2 key and voila... it just worked. And sitting in the kitchen which is really far from the router was getting 60% reception! Amazing! Also the Ethernet connection is Gigabit (it is not even mentioned on the box!). It has a lot more feature than I need, as it can run as a full access point, acting as a DHCP server, etc... It has been rock solid since we installed it.
+</li>
+</ul>
+
+<p>
+Clearly it has been quite an adventure and I am still unclear why I can never see higher than ~140Mbps transfer rate. The reality is my Internet connection is less than 20Mbps so it will never be an issue with the Internet. If I want to transfer big files I can simply add a gigabit switch (which I already own) to my access point so that the transfer go through the switch.
+
+<p>
+In conclusion I wanted to emphasize 2 points:
+
+<li>In this case more expensive really meant better quality. I ended up paying ~$160 for the Access Point but it is worth it! (I know it is cheaper on Amazon but I could buy it right away and return it quickly in the event it did not work) </li>
+<li>Make sure you buy at a store where you can easily return! Clearly Amazon is awesome in that regards but the turn around is way too slow. I ended up buying at Fry's. It was more expensive but I could buy and return several items the same day!</li>

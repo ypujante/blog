@@ -1,0 +1,22 @@
+
+---
+layout: post
+title: OSGi at LinkedIn (EclipseCon 2009)
+category: OSGi
+---
+My presentation about <a href="http://live.eclipse.org/node/731">Building LinkedIn’s Next Generation Architecture with OSGi</a> is live on the EclipseCon web site (slides + audio). Here is the abstract:
+
+<em><p>Over the course of the last 5 years, LinkedIn has been built using relatively simple technologies: front end web applications (tomcat/servlet/jsp), backend services (jetty/spring remoting), databases, replication, jms. Although the web site was scaling adequately, LinkedIn had some big challenges to overcome:</p>
+
+<li>
+a growing engineering team working on a monolithic code base (albeit modular)
+</li>
+<li>a growing product team wanting more and more features, faster</li>
+<li>a growing operations team deploying more and more servers</li>
+<li>and more...</li>
+
+<p>In March of 2008, a group of Senior Engineers started a project to explore the best available technologies which could help in building the next generation of the architecture that would address those challenges. The new architecture involved using OSGI/Spring DM as the foundation because it had the right properties we were interested in. The code was migrated to a more modular paradigm using binary consumption.</p>
+
+<p>This session will demonstrate how we integrated OSGi, the pros and cons of the changes, the pain points as well as the migration strategy.
+</p>
+</em>

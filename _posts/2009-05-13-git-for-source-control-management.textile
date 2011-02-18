@@ -1,0 +1,56 @@
+
+---
+layout: post
+title: git for source control management
+category: pongasoft
+tags:
+  - mercurial
+  - git
+  - scm
+---
+<p>
+When I started working on my project, I needed to setup an scm (source control management). One of the goal of the project was to look at new technologies and trends and see how well they can solve some issues I have encountered throughout my career. I am familiar with 2 popular scms: <code>cvs</code> and <code>svn</code>. 
+</p>
+
+<p>
+At LinkedIn, we started with <code>cvs</code>. Although being widely popular, it has several shortcomings, mainly non transactional commits and very heavy branching / tagging operations. Transactional commit is quite important as it insures that whenever you checkout code, you will always get a consistent view and not a partial commit that somebody else is currently checking in (or even worse if two people are checking in at the same time). "Consistent" is obviously from the point of view of the scm, as a developer may still check in an inconsistent set of files by forgetting to check in one of them for example. <code>cvs</code> fails in that regard as there is no consistency guaranteed. Branching and tagging in <code>cvs</code> is painful because it happens at the file level, so the bigger the project is, the longer it takes.
+</p>
+
+<p>
+With a rapidly growing project and team, it was becoming unmanageable with <code>cvs</code>. We then moved to <code>svn</code> which was solving the two main issues I was talking about: with <code>svn</code>, commits are transactional: every time you commit you actually have an ever increasing commit number which refers to the entire commit. Either the entire commit will go through or not and another developer will never see an inconsistent view. Branching and tagging are very lightweight operations in <code>svn</code> as it does not copy the entire tree.
+</p>
+
+<p>
+After using <code>svn</code> for a while, although being an improvement over <code>cvs</code> I am still pretty unhappy with it as there are several big issues like loosing the history of commits (mild problem) to loosing changes when files are moved around on a different branch (really bad). Also, although branching is much easier/faster than <code>cvs</code>, the syntax to merge is quite complicated and error prone by having to constantly figure out the correct commit numbers to use. To be fair, some of those issues are being addressed in more recent versions (although it is still not there yet).
+</p>
+
+<p>
+In my quest for something better, I started hunting around and clearly the new trend is Distributed SCM. Open source projects are the perfect example of highly distributed development environments and having a centralized scm (like <code>cvs</code> or <code>svn</code>) is showing its limitations. Hence the need for an scm that would handle this kind of projects. I believe that the most prominent distributed scms today are <a href="http://git-scm.com/"><code>git</code></a> and <a href="http://www.selenic.com/mercurial/wiki"><code>mercurial</code></a>. Both projects were started around the same time as a free/open source response to BitKeeper which was not going to be free anymore. <code>git</code> was created by Linus Torvald for handling the Linux kernel development. <code>mercurial</code> was created by Matt Mackall.
+</p>
+
+<p>
+On the paper, despite some minor differences the concepts are essentially the same. Not having any preconceived ideas with either of them, I decided to use <code>git</code> for my own project mainly because of the IDE support: it has very good support in <a href="http://www.jetbrains.com/idea/">Intellij IDEA</a>. I am by no mean an expert in <code>git</code> but I can share my experience after using it for several months now.
+<li>
+The very first thing that I noticed right away and I am still blown away every time, is how fast it is. There is just no comparison possible with the others I was mentioning... Of course I am comparing apples and oranges because my project is by no mean the size of LinkedIn's source code, but even on smaller projects there is a clear difference mainly because there is no network access involved (and even when there is, it is still blowing me away). 
+</li>
+<li>
+Command line syntax is a lot easier to use than <code>svn</code>: creating branches, switching between them, merging,... is all a breeze. Nonetheless, there is something that takes time to get used to: the 'staging' area which is definitely not very intuitive at first especially coming from a different model. Let's take an example: you start modifying a file then you want to commit the changes. You must first move the file in the staging area by issuing '<code>git&nbsp;add&nbsp;&lt;file&gt;</code>'. If before committing, you modify the file again, you must add it to the staging area again. In the IDE, you don't have to worry about any of this which makes it very transparent. On the command line, you just need to be a little bit more careful, but it has become a habit to always issue a '<code>git&nbsp;status</code>' command which tells you the state of your changes and which ones need to be moved in the staging area.
+</li>
+<li>
+I guess one might wonder if it is not overkill to use a distributed scm when I am essentially the only developer on the project! Actually the more I use it and the more I discover how beneficial it is even in this situation. I am actually writing this post from a meeting in south of France. I wanted to be able to continue working on the project even while being remote. My project is currently on my desktop at home so if I wanted to use <code>svn</code> for example, I would have to be able to somehow connect to my desktop to be able to continue working... But I don't have any of this issue with <code>git</code> at all: I simply cloned my repository on my laptop before leaving which you can do over ssh very easily as it is built-in: '<code>git&nbsp;clone&nbsp;<em>user@machine</em>:/path/to/repo</code>'. I can then work on my laptop during the entire time I am away, creating branches, committing as many time as I want. When I come back I will simply issue a '<code>git&nbsp;push</code>' command (yes that is it... I don't even have to tell it where to push to!!) to move back all the changes I have made onto my desktop with full history! Really neat! By the way since it is all local, it is also perfect for plane work!
+</li>
+<li>
+On the mac, there is a very neat application called <a href="http://gitx.frim.nl/">GitX</a> which can help you visualize the repository and also move files in the staging area.
+</li>
+<li>
+There is also a service called <a href="http://github.com/">github</a> that has been built around <code>git</code> to facilitate the creation of open source projects. By lowering the barriers to be able to contribute to open source projects, I think it has great potential to become quite a nice platform.
+</li>
+</p>
+
+<p>
+I have not tried <code>mercurial</code> at all so I do not have anything on my own I can share. I have heard people complaining about the fact that <code>mercurial</code> does not allow you to rewrite the history where <code>git</code> does and depending on which camp you are, it may be good or bad. I don't mind that <code>git</code> allows you to do that and if you don't like it then you just don't use the feature.
+</p>
+
+<p>
+As I was mentioning previously, distributed scm is the new trend. After trying it for myself for a while I have become very excited about it and I really don't believe it is just a fad. My personal opinion is that it is the future. Even for non distributed projects (like mine at the moment), the benefits are obvious. I do not regret the decision I have made as it allowed me to see the potential of this emerging technology! Distributed scm is a brilliant idea and I invite you to try it out: once you make the switch you will not want to go back.
+</p>

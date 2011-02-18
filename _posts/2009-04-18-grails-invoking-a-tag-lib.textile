@@ -1,0 +1,97 @@
+
+---
+layout: post
+title: Grails - Invoking a tag lib from another tag lib
+category: grails
+tags:
+  - grails
+  - java
+  - tags
+---
+<p>Grails comes with a predefined set of tags that you can use in your gsp pages. If you want to add your own tags, it is pretty simple and you can simply check the <a href="http://www.grails.org/Dynamic+Tag+Libraries">Dynamic Tag Libraries</a> reference documentation. I created my own version of the <code>&lt;g:each&gt;</code> tag which allows you to provide a <code>begin</code>, <code>end</code> and <code>separator</code> attributes:</p>
+<pre>
+class MyTagLib {
+  static namespace = 'my'
+  // Equivalent to g:each but allow for begin/end and separator attributes
+  def each = { attrs, body -&gt;
+    def var = attrs.var ?: "var"
+
+    def begin = attrs.begin ?: ""
+    def end = attrs.end ?: ""
+
+    def writer = out
+
+    if(attrs.in)
+    {
+      // not null and not empty (definition of truth in groovy)
+      attrs.in.eachWithIndex { elt, i -&gt;
+        if(i == 0)
+        {
+          writer &lt;&lt; begin
+        }
+        else
+        {
+          writer &lt;&lt; attrs.separator
+        }
+        writer &lt;&lt; body((var):elt)
+      }
+
+      writer &lt;&lt; end
+    }
+    else
+    {
+      if(attrs.alwaysBeginEnd?.toString() == "true")
+      {
+        writer &lt;&lt; begin &lt;&lt; end
+      }
+    }
+  }
+}
+</pre>
+<p>Here are some examples of rendering in gsp:</p>
+<pre>
+&lt;my:each in="${[1,2,3]}" var="i"&gt;${i}&lt;/my:each&gt;
+produces: 123
+&lt;my:each in="${[1,2,3]}" var="i" begin="{" end="}" separator=","&gt;${i}&lt;/my:each&gt;
+produces: {1,2,3}
+&lt;my:each in="${[1]}" var="i" begin="{" end="}" separator=","&gt;${i}&lt;/my:each&gt;
+produces: {1}
+&lt;my:each in="${[]}" var="i" begin="{" end="}" separator=","&gt;${i}&lt;/my:each&gt;
+produces: 
+&lt;my:each in="${[]}" var="i" begin="{" end="}" separator="," alwaysBeginEnd="true"&gt;${i}&lt;/my:each&gt;
+produces: {}
+</pre>
+<p>
+This tag is pretty convenient as it automatically takes care of an empty list or one that has only one element to properly display the separator and the begin and end attributes. The last example shows how you can 'force' to display the begin and end attributes when the list is empty.
+</p>
+
+<p>Now, let's say I want to create another tag which will reuse the code I already wrote. In other words, I need to call a tag from within a tag. Here is how I would do it:</p>
+<pre>
+def csv = { attrs, body -&gt;
+  def var = attrs.var ?: "var"
+  out &lt;&lt; my.each(in: attrs.in, var: 'v', separator: ',') { map -&gt;
+  def elt = map.v
+  out &lt;&lt; "{"
+  out &lt;&lt; body((var):elt)
+  out &lt;&lt; "}"
+  }
+}
+</pre>
+
+<p>And here is the rendering in gsp:</p>
+<pre>
+&lt;my:csv in="${[1,2,3]}" var="i"&gt;[${i}]&lt;/my:csv&gt;
+produces: {[1]},{[2]},{[3]}
+</pre>
+
+<p>It is actually not that trivial to call a tag from within a tag (and to my knowledge it is not documented)... let's cover each details:
+<ul>
+<li>referencing another tag is used with the notation: <code><em>namespace.tagName</em></code> (ex: <code>my.each</code>)</li>
+<li>simply calling the other tag is not enough and the result must be sent to the writer (ex: <code>out&nbsp;&lt;&lt;&nbsp;my.each(...)</code>)</li>
+<li>each attribute is passed in as a map, so you simply use the groovy map notation (ex: <code>(in:&nbsp;attrs.in,&nbsp;var:&nbsp;'v',&nbsp;separator:&nbsp;',')</code>)</li>
+<li>now the really tricky part is the closure which corresponds to the children tags in gsp... the argument that you get is a map (because in the <code>my.each</code> code, the <code>body</code> closure is called with a map!). Although it makes sense, it is not that trivial because in gsp you don't see it. This is why I need to use <code>map.v</code> to have access to the element that is being iterated over (the variable <code>v</code> is because it is the one that I used in the call (<code>my.each(...,&nbsp;var:&nbsp;'v',&nbsp;...)))</code></li>
+</ul>
+</p>
+
+<p>Although a little tricky to write, it is very powerful to be able to create tags that build upon other tags. There is one little caveat in how <code>null</code> is being handled and I opened a Jira ticket for it (<a href="http://jira.codehaus.org/browse/GRAILS-4449">GRAILS-4449</a>) as it does not seem to be consistent.</p>
+

@@ -1,0 +1,13 @@
+
+---
+layout: post
+title: pongasoft.... a new adventure
+category: pongasoft
+tags:
+  - pongasoft
+---
+One thing that I have been wanting to talk about is the 'story' behind <a href="http://www.pongasoft.com">pongasoft</a>. It all began during the holidays 2008 when I realized that I had been working for LinkedIn for a rather long period of time (you could say that over 6 years is an eternity in startup lingo ;) ). LinkedIn is a cool company, don't get me wrong, and the technologies behind are very cool and also bleeding edge (<a href="http://blog.linkedin.com/?s=osgi">OSGi</a> for example). Nonetheless, you are still pretty constrained in what you can and cannot do for practical reasons. Also in 6 years, things have changed quite drastically in some areas: for example, web hosting is widely available and affordable, cloud computing is changing the face of how you can bootstrap an idea and be able to scale it with little investment upfront, new (dynamic) languages like Groovy and Scala are changing the landscape and offering new ways to implement ideas.
+
+<p>While brainstorming with my partner I had an idea for a tool that I wanted to build and decided to give it a shot. The purpose would be to essentially start from scratch with no preconceived ideas and try to use as much open source software and new technologies as possible. I have been very lucky that LinkedIn allowed me to work part-time since it allows me to concentrate on my own project while still having a portion of my income. I have been working on the tool for about 3 months now and it has been an incredible learning experience: from domain name purchase to cloud computing (barely started yet), the gamut of technologies involved is pretty large. I think the main drawback is that the progress is slower than I was anticipating and can sometimes be frustrating, but the journey in itself is awesome.</p>
+
+<p>I am planning to share a lot of this experience in subsequent blog posts and of course release the [beta version] of the tool at some point in the near future for feedback. I am excited to see if people would be interested. If not then I won't be regretting a thing as what matters to me the most is the adventure.</p>
