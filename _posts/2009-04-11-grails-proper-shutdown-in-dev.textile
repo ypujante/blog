@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/grails_proper_shutdown_in_dev
 title: Grails - Proper shutdown in dev mode
 category: grails
 tags:

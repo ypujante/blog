@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/osgi_at_linkedin_eclipsecon_2009
 title: OSGi at LinkedIn (EclipseCon 2009)
 category: OSGi
 ---

@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/pongasoft_a_new_adventure
 title: pongasoft.... a new adventure
 category: pongasoft
 tags:

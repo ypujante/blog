@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/using_gradle_with_grails
 title: Using gradle with grails
 category: grails
 tags:

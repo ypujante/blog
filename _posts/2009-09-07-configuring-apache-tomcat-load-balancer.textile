@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/configuring_apache_tomcat_load_balancer
 title: Configuring apache -> tomcat load balancer
 category: java
 ---

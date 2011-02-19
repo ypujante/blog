@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/grails_groovy_for_the_frontend
 title: Grails/Groovy for the frontend
 category: grails
 tags:

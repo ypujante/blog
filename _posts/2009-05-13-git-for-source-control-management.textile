@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/git_for_source_control_management
 title: git for source control management
 category: pongasoft
 tags:

@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/linkedend
 title: LinkedEnd...
 category: misc
 tags:

@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/css_for_the_ui_design
 title: CSS for the UI design
 category: pongasoft
 tags:

@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/the_nightmares_of_setting_up
 title: The nightmares of setting up a wireless N network
 category: misc
 ---

@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/starting_from_scratch_domain_name
 title: Starting from scratch... domain name and web hosting
 category: pongasoft
 ---

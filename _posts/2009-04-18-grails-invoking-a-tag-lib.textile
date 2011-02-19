@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/grails_invoking_a_tag_lib
 title: Grails - Invoking a tag lib from another tag lib
 category: grails
 tags:

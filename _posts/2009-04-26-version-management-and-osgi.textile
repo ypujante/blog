@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/version_management_and_osgi
 title: Version Management and OSGi
 category: OSGi
 tags:

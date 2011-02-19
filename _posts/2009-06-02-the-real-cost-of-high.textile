@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/the_real_cost_of_high
 title: The real cost of high-speed internet in the US
 category: misc
 tags:

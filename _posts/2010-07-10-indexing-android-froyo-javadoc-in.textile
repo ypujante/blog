@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/indexing_android_froyo_javadoc_in
 title: Indexing android 'froyo' javadoc in kiwidoc
 category: pongasoft
 tags:

@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/connecting_to_a_local_vm
 title: Connecting to a local vm using jmx knowing the process id.
 category: java
 tags:

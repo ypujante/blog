@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/zookeeper_loss_of_events_problem
 title: ZooKeeper loss of events problem... fixed
 category: java
 tags:

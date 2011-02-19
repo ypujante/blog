@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/automating_publishing_to_maven_central
 title: Automating publishing to maven central via Sonatype
 category: java
 tags:

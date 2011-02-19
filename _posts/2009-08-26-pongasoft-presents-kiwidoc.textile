@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/pongasoft_presents_kiwidoc
 title: pongasoft presents... kiwidoc
 category: pongasoft
 ---

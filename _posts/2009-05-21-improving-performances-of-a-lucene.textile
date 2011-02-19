@@ -1,6 +1,6 @@
-
 ---
 layout: post
+permalink: /entry/improving_performances_of_a_lucene
 title: Improving performances of a Lucene Search
 category: java
 ---
