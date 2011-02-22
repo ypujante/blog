@@ -99,6 +99,7 @@ a.nav {
    font-family: {{ site.monospaceFontFamily }};
    letter-spacing: -0.1em;
    font-size: 1.5em;
+   font-weight: bold;
    background: {{ site.titleColor }};
    color: white;
    border-color: {{ site.contentColor }} {{ site.contentColor }} white;
@@ -106,7 +107,7 @@ a.nav {
    border-width: 1px;
    margin: 0;
    padding: 20px;
-   text-shadow: 2px 2px 0 #444444;
+   text-shadow: 2px 2px 2px #000000;
  }
 
 /**
@@ -170,6 +171,7 @@ a.nav {
   font-family: {{ site.contentFontFamily }};
   background: {{ site.contentColor }};
   text-align: justify;
+  overflow: auto;
 }
 
 .col2 .post-title-content-footer {
@@ -188,13 +190,41 @@ a.nav {
   background: #dddddd;
 }
 
+/**
+ * Post by categories */
+.col2 table.posts-by-category {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.col2 table.posts-by-category td {
+  white-space: nowrap;
+  border-bottom: dotted 1px #aaaaaa;
+  padding-right: 0.5em;
+}
+
+.col2 table.posts-by-category td a.title:visited {
+  color: #000000;
+  text-decoration: none;
+}
+
+.col2 table.posts-by-category td a.title:link {
+  color: #000000;
+  text-decoration: none;
+}
+
+.col2 table.posts-by-category td a.title:hover {
+  color: {{ site.titleColor }};
+  text-decoration: none;
+}
+
+
 /***************
  * page footer
  ****************/
 /**
  * logo */
 .page-footer .logo {
-  height: 100%;
   border: solid 5px white;
   font-size: 3.5em;
   display: inline-block;
