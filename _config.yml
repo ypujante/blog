@@ -1,11 +1,5 @@
 pygments: true
 url: http://www.pongasoft.com/blog/yan
 permalink: pretty
-category_title_prefix: 'Br0kenB1ts - '
-mainColor1: '#005a87'
-mainColor2: '#0075b0'
-contentColor: '#eeeeee'
-titleColor: 'maroon'
-contentFontFamily: 'Arial,Helvetica,sans-serif'
-monospaceFontFamily: 'Courier New,monospace'
-dateBackgroundColor: '#888888'
+category_title_prefix: ''
+exclude: ['jkdev.sh']

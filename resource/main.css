@@ -1,9 +1,16 @@
 ---
+mainColor1: '#005a87'
+mainColor2: '#0075b0'
+contentColor: '#eeeeee'
+titleColor: 'maroon'
+contentFontFamily: 'Helvetica,Arial,sans-serif'
+monospaceFontFamily: 'Courier New,monospace'
+dateBackgroundColor: '#888888'
 ---
 html {
-  background: -webkit-gradient(linear,0 100%,0 0,color-stop(.4,{{ site.mainColor1 }}),color-stop(1,{{ site.mainColor2 }})) fixed no-repeat 0 100%;
-  background: -moz-linear-gradient(bottom,{{ site.mainColor1 }} 40%,{{ site.mainColor2 }}) fixed no-repeat 0 100%;
-  background-color: {{ site.mainColor2 }};
+  background: -webkit-gradient(linear,0 100%,0 0,color-stop(.4,{{ page.mainColor1 }}),color-stop(1,{{ page.mainColor2 }})) fixed no-repeat 0 100%;
+  background: -moz-linear-gradient(bottom,{{ page.mainColor1 }} 40%,{{ page.mainColor2 }}) fixed no-repeat 0 100%;
+  background-color: {{ page.mainColor2 }};
   min-width: 800px;
 }
 
@@ -53,8 +60,8 @@ html {
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   width: 100%;
   min-height: 6em;
-  background: {{ site.mainColor2 }};
-  border-top: solid 1px {{ site.mainColor1 }};
+  background: {{ page.mainColor2 }};
+  border-top: solid 1px {{ page.mainColor1 }};
   padding: 1em 0 0 1em;
 }
 
@@ -62,7 +69,7 @@ html {
  * navigation in col1 & col3
  *****************************/
 a.nav {
-   font-family: {{ site.monospaceFontFamily }};
+   font-family: {{ page.monospaceFontFamily }};
    font-weight: bold;
    letter-spacing: -0.1em;
    text-shadow: 1px 1px 0 #000000;
@@ -80,7 +87,7 @@ a.nav {
 
  a.nav:hover {
    text-decoration: none;
-   color: {{ site.titleColor }};
+   color: {{ page.titleColor }};
  }
 
  td.nav-arrow {
@@ -96,13 +103,13 @@ a.nav {
 /**
  * post title */
 .col2 .post-title {
-   font-family: {{ site.monospaceFontFamily }};
+   font-family: {{ page.monospaceFontFamily }};
    letter-spacing: -0.1em;
    font-size: 1.5em;
    font-weight: bold;
-   background: {{ site.titleColor }};
+   background: {{ page.titleColor }};
    color: white;
-   border-color: {{ site.contentColor }} {{ site.contentColor }} white;
+   border-color: {{ page.contentColor }} {{ page.contentColor }} white;
    border-style: solid solid groove;
    border-width: 1px;
    margin: 0;
@@ -121,7 +128,7 @@ a.nav {
  }
 
 .post-info .date .year {
-   background: {{ site.dateBackgroundColor }};
+   background: {{ page.dateBackgroundColor }};
    color: white;
    text-align: center;
    text-shadow: 1px 1px 0 #000000;
@@ -130,7 +137,7 @@ a.nav {
  }
 
 .post-info .date .month-day {
-   background: {{ site.dateBackgroundColor }};
+   background: {{ page.dateBackgroundColor }};
    color: white;
    text-align: center;
    text-shadow: 1px 1px 0 #000000;
@@ -146,9 +153,9 @@ a.nav {
 
 .post-info {
    padding: 0.5em;
-   background: {{ site.contentColor }};
+   background: {{ page.contentColor }};
    border-top: solid 1px white;
-   font-family: {{ site.monospaceFontFamily }};
+   font-family: {{ page.monospaceFontFamily }};
  }
 
 .post-info .post-categories {
@@ -168,8 +175,8 @@ a.nav {
   border: solid 1px white;
   padding: 2em;
   margin: 0;
-  font-family: {{ site.contentFontFamily }};
-  background: {{ site.contentColor }};
+  font-family: {{ page.contentFontFamily }};
+  background: {{ page.contentColor }};
   text-align: justify;
   overflow: auto;
 }
@@ -214,7 +221,7 @@ a.nav {
 }
 
 .col2 table.posts-by-category td a.title:hover {
-  color: {{ site.titleColor }};
+  color: {{ page.titleColor }};
   text-decoration: none;
 }
 
@@ -235,7 +242,7 @@ a.nav {
   border-top-left-radius: 20px;
   border-bottom-right-radius: 20px;
   color: white;
-  font-family: {{ site.monospaceFontFamily }};
+  font-family: {{ page.monospaceFontFamily }};
   float: left;
 } 
 
@@ -255,7 +262,7 @@ a.nav {
 
 .page-footer .site-categories li {
   display: inline;
-  font-family: {{ site.monospaceFontFamily }};
+  font-family: {{ page.monospaceFontFamily }};
   font-size: 1.5em;
 }
 
