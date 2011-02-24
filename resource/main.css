@@ -45,6 +45,10 @@ a.nav:hover {
    text-decoration: none;
    color: {{ site.titleBGColor }};
  }
+ 
+ tt, code {
+   background: #cccccc;
+ }
 
 /***********************************
  * 2 column layout + fixed footer
@@ -97,7 +101,7 @@ a.nav:hover {
    padding: 0;
  }
 
- table.nav td.next {
+ table.nav td.previous {
    text-align: right;
  }
 
@@ -205,6 +209,13 @@ a.nav:hover {
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
   padding: 1em;
   background: #dddddd;
+}
+
+/**
+ * specifig css */
+.post-content div.warning {
+  border: dashed 2px #9c5e00;
+  background-color: #bdad93;
 }
 
 /**
@@ -356,4 +367,3 @@ div.twtr-doc {
   color: {{ site.titleFGColor }};
   padding-right: 2em;
 }
-
