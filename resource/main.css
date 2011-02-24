@@ -232,6 +232,23 @@ a.nav:hover {
   font-size: 0.8em;
 }
 
+a.nav-cc {
+   letter-spacing: -0.1em;
+ }
+
+a.nav-cc:visited {
+   color: {{ site.contentFGColor }};
+ }
+
+a.nav-cc:link {
+   color: {{ site.contentFGColor }};
+ }
+
+a.nav-cc:hover {
+  text-decoration: underline;
+   color: {{ site.titleBGColor }};
+ }
+
 /***********************************
  * sidebar
  ***********************************/
