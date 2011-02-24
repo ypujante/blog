@@ -17,12 +17,17 @@
       <div class="post-info">
         <table class="nav">
           <tr>
+            <td class="next">
             {% if post.next %}
-            <td class="next"><a href="{{site.url}}{{ post.next.url }}" title="{{ post.next.title }}"><span class="nav-arrow">&larr;</span>&nbsp;Next</a></td>
+            <a href="{{site.url}}{{ post.next.url }}" title="{{ post.next.title }}"><span class="nav-arrow">&larr;</span>&nbsp;Next</a>
             {% endif %}
+            </td>
+            <td class="home"><a href="{{site.url}}">Home</a></td>
+            <td class="previous">
             {% if post.previous %}
-            <td class="previous"><a href="{{site.url}}{{ post.previous.url }}" title="{{ post.previous.title }}">Previous&nbsp;<span class="nav-arrow">&rarr;</span></a></td>
+            <a href="{{site.url}}{{ post.previous.url }}" title="{{ post.previous.title }}">Previous&nbsp;<span class="nav-arrow">&rarr;</span></a>
             {% endif %}
+            </td>
           </tr>
         </table>
         <div class="date">

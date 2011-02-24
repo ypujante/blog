@@ -105,8 +105,13 @@ a.nav:hover {
    text-align: right;
  }
 
+ table.nav td.home {
+   text-align: center;
+ }
+
  table.nav td {
    font-size: 0.8em;
+   width: 33%;
  }
 
  .nav-arrow {
@@ -162,6 +167,7 @@ a.nav:hover {
 .post-info .details {
    vertical-align: middle;
    display: inline-block;
+   font-size: 0.8em;
  }
 
 .post-info {

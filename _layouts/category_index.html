@@ -17,6 +17,17 @@ layout: default
   <div class="col2">
     <div class="post-title-content-footer">
       <div class="post-title">Br0kenB1ts - {{ page.title }}</div>
+      <div class="post-info">
+        <table class="nav">
+          <tr>
+            <td class="next">
+            </td>
+            <td class="home"><a href="{{site.url}}">Home</a></td>
+            <td class="previous">
+            </td>
+          </tr>
+        </table>
+      </div>
       <div class="post-content">
         <table class="posts-by-category">
           {% for post in posts %}
