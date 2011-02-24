@@ -1,17 +1,32 @@
 ---
-mainColor1: '#005a87'
-mainColor2: '#0075b0'
-contentColor: '#eeeeee'
-titleColor: 'maroon'
-contentFontFamily: 'Helvetica,Arial,sans-serif'
-monospaceFontFamily: 'Courier New,monospace'
-dateBackgroundColor: '#888888'
 ---
+/***********************************
+ * general
+ ***********************************/
+
 html {
-  background: -webkit-gradient(linear,0 100%,0 0,color-stop(.4,{{ page.mainColor1 }}),color-stop(1,{{ page.mainColor2 }})) fixed no-repeat 0 100%;
-  background: -moz-linear-gradient(bottom,{{ page.mainColor1 }} 40%,{{ page.mainColor2 }}) fixed no-repeat 0 100%;
-  background-color: {{ page.mainColor2 }};
+  background: -webkit-gradient(linear,0 100%,0 0,color-stop(.4,{{ site.mainColor1 }}),color-stop(1,{{ site.mainColor2 }})) fixed no-repeat 0 100%;
+  background: -moz-linear-gradient(bottom,{{ site.mainColor1 }} 40%,{{ site.mainColor2 }}) fixed no-repeat 0 100%;
+  background-color: {{ site.mainColor2 }};
   min-width: 800px;
+}
+
+a:visited {
+  text-decoration: none;
+  color: {{ site.mainColor1 }};
+  text-shadow: 1px 1px 2px #000000;
+}
+
+a:link {
+  text-decoration: none;
+  color: {{ site.mainColor1 }};
+  text-shadow: 1px 1px 2px #000000;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: {{ site.mainColor1 }};
+  text-shadow: 1px 1px 2px #000000;
 }
 
 /***********************************
@@ -54,14 +69,14 @@ html {
   left: 0;
   position: fixed;
   right: 0;
-  z-index: 1;
+  z-index: 100;
   -moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   width: 100%;
   min-height: 6em;
-  background: {{ page.mainColor2 }};
-  border-top: solid 1px {{ page.mainColor1 }};
+  background: {{ site.mainColor2 }};
+  border-top: solid 1px {{ site.mainColor1 }};
   padding: 1em 0 0 1em;
 }
 
@@ -69,7 +84,7 @@ html {
  * navigation in col1 & col3
  *****************************/
 a.nav {
-   font-family: {{ page.monospaceFontFamily }};
+   font-family: {{ site.monospaceFontFamily }};
    font-weight: bold;
    letter-spacing: -0.1em;
    text-shadow: 1px 1px 0 #000000;
@@ -77,21 +92,26 @@ a.nav {
 
  a.nav:visited {
    text-decoration: none;
-   color: white;
+   color: {{ site.titleFGColor }};
  }
 
  a.nav:link {
    text-decoration: none;
-   color: white;
+   color: {{ site.titleFGColor }};
  }
 
  a.nav:hover {
    text-decoration: none;
-   color: {{ page.titleColor }};
+   color: {{ site.titleBGColor }};
  }
 
+table.nav {
+  border-bottom: dotted 1px black;
+  margin-bottom: 1em;
+}
+
  td.nav-arrow {
-   color: white;
+   color: {{ site.titleFGColor }};
    font-size: 1.5em;
    text-shadow: 1px 1px 0 #000000;
  }
@@ -103,13 +123,13 @@ a.nav {
 /**
  * post title */
 .col2 .post-title {
-   font-family: {{ page.monospaceFontFamily }};
+   font-family: {{ site.monospaceFontFamily }};
    letter-spacing: -0.1em;
    font-size: 1.5em;
    font-weight: bold;
-   background: {{ page.titleColor }};
-   color: white;
-   border-color: {{ page.contentColor }} {{ page.contentColor }} white;
+   background: {{ site.titleBGColor }};
+   color: {{ site.titleFGColor }};
+   border-color: {{ site.contentBGColor }} {{ site.contentBGColor }} white;
    border-style: solid solid groove;
    border-width: 1px;
    margin: 0;
@@ -128,7 +148,7 @@ a.nav {
  }
 
 .post-info .date .year {
-   background: {{ page.dateBackgroundColor }};
+   background: {{ site.dateBackgroundColor }};
    color: white;
    text-align: center;
    text-shadow: 1px 1px 0 #000000;
@@ -137,7 +157,7 @@ a.nav {
  }
 
 .post-info .date .month-day {
-   background: {{ page.dateBackgroundColor }};
+   background: {{ site.dateBackgroundColor }};
    color: white;
    text-align: center;
    text-shadow: 1px 1px 0 #000000;
@@ -153,9 +173,10 @@ a.nav {
 
 .post-info {
    padding: 0.5em;
-   background: {{ page.contentColor }};
+   background: {{ site.contentBGColor }};
    border-top: solid 1px white;
-   font-family: {{ page.monospaceFontFamily }};
+   font-family: {{ site.monospaceFontFamily }};
+   font-weight: bold;
  }
 
 .post-info .post-categories {
@@ -175,8 +196,8 @@ a.nav {
   border: solid 1px white;
   padding: 2em;
   margin: 0;
-  font-family: {{ page.contentFontFamily }};
-  background: {{ page.contentColor }};
+  font-family: {{ site.contentFontFamily }};
+  background: {{ site.contentBGColor }};
   text-align: justify;
   overflow: auto;
 }
@@ -210,21 +231,46 @@ a.nav {
   padding-right: 0.5em;
 }
 
-.col2 table.posts-by-category td a.title:visited {
-  color: #000000;
-  text-decoration: none;
+/*.col2 table.posts-by-category td a.title:visited {*/
+  /*color: #000000;*/
+  /*text-decoration: none;*/
+/*}*/
+
+/*.col2 table.posts-by-category td a.title:link {*/
+  /*color: #000000;*/
+  /*text-decoration: none;*/
+/*}*/
+
+/*.col2 table.posts-by-category td a.title:hover {*/
+  /*color: {{ site.titleBGColor }};*/
+  /*text-decoration: none;*/
+/*}*/
+
+/***********************************
+ * sidebar
+ ***********************************/
+.sidebar .entry {
+ margin-top: 0;
+ -moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+ -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+ box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);   
+}
+ 
+.sidebar .entry dt {
+  background: {{ site.titleBGColor }};
+  color: {{ site.titleFGColor }};
+  text-shadow: 1px 1px 1px #000000;
+  padding: 0.5em;
+  border-color: {{ site.contentBGColor }} {{ site.contentBGColor }} white;
+  border-style: solid solid groove;
+  border-width: 1px;
 }
 
-.col2 table.posts-by-category td a.title:link {
-  color: #000000;
-  text-decoration: none;
+.sidebar .entry dd {
+  background: {{ site.contentBGColor }};
+  margin: 0;
+  padding: 0.5em;
 }
-
-.col2 table.posts-by-category td a.title:hover {
-  color: {{ page.titleColor }};
-  text-decoration: none;
-}
-
 
 /***************
  * page footer
@@ -242,7 +288,7 @@ a.nav {
   border-top-left-radius: 20px;
   border-bottom-right-radius: 20px;
   color: white;
-  font-family: {{ page.monospaceFontFamily }};
+  font-family: {{ site.monospaceFontFamily }};
   float: left;
 } 
 
@@ -262,7 +308,7 @@ a.nav {
 
 .page-footer .site-categories li {
   display: inline;
-  font-family: {{ page.monospaceFontFamily }};
+  font-family: {{ site.monospaceFontFamily }};
   font-size: 1.5em;
 }
 
@@ -278,7 +324,7 @@ a.nav {
 .page-footer .copyright {
   text-align: right;
   clear: both;
-  color: white;
+  color: {{ site.titleFGColor }};
   padding-right: 2em;
 }
 

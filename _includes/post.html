@@ -6,13 +6,16 @@
     <div class="col1">
       <div class="col1-content">
         {% if post.next %}
-        <table>
+        <table class="nav">
           <tr>
             <td class="nav-arrow">&larr;</td>
             <td><a class="nav" href="{{site.url}}{{ post.next.url }}" title="{{ post.next.title }}">{{ post.next.title }}</a></td>
           </tr>
         </table>
         {% endif %}
+        <div class="sidebar">
+          {% include sidebar1.html %}
+        </div>
       </div>
     </div>
     <div class="col2">
@@ -64,13 +67,16 @@
   <div class="col3">
     <div class="col3-content">
       {% if post.previous %}
-      <table>
+      <table class="nav">
         <tr>
           <td><a class="nav" href="{{site.url}}{{ post.previous.url }}" title="{{ post.previous.title }}">{{ post.previous.title }}</a></td>
           <td class="nav-arrow">&rarr;</td>
         </tr>
       </table>
       {% endif %}
+      <div class="sidebar">
+        {% include sidebar2.html %}
+      </div>
     </div>
   </div>
   <div class="page-footer">

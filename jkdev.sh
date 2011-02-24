@@ -1,2 +1,2 @@
 #!/bin/sh
-jekyll --url http://localhost:4000
+jekyll --url http://localhost:4000 $@
