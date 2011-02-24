@@ -14,22 +14,22 @@
       <div class="post-title">
         {{ post.title }}
       </div>
+      <table class="nav">
+        <tr>
+          <td class="next">
+          {% if post.next %}
+          <a href="{{site.url}}{{ post.next.url }}" title="{{ post.next.title }}"><span class="nav-arrow">&larr;</span>&nbsp;Next</a>
+          {% endif %}
+          </td>
+          <td class="home"><a href="{{site.url}}">Home</a></td>
+          <td class="previous">
+          {% if post.previous %}
+          <a href="{{site.url}}{{ post.previous.url }}" title="{{ post.previous.title }}">Previous&nbsp;<span class="nav-arrow">&rarr;</span></a>
+          {% endif %}
+          </td>
+        </tr>
+      </table>
       <div class="post-info">
-        <table class="nav">
-          <tr>
-            <td class="next">
-            {% if post.next %}
-            <a href="{{site.url}}{{ post.next.url }}" title="{{ post.next.title }}"><span class="nav-arrow">&larr;</span>&nbsp;Next</a>
-            {% endif %}
-            </td>
-            <td class="home"><a href="{{site.url}}">Home</a></td>
-            <td class="previous">
-            {% if post.previous %}
-            <a href="{{site.url}}{{ post.previous.url }}" title="{{ post.previous.title }}">Previous&nbsp;<span class="nav-arrow">&rarr;</span></a>
-            {% endif %}
-            </td>
-          </tr>
-        </table>
         <div class="date">
           <div class="month-day">{{post.date | date: "%b %d"}}</div>
           <div class="year">{{post.date | date: "%Y"}}</div>

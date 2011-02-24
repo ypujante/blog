@@ -97,8 +97,12 @@ a.nav:hover {
  * navigation / prev/next */
  table.nav {
    width: 100%;
+   padding: 0 0.2em 0 0.2em;
    margin: 0;
-   padding: 0;
+
+  border-spacing: 0;
+  border-bottom: groove 1px white;
+  background: {{ site.contentBGColor }};
  }
 
  table.nav td.previous {
@@ -171,9 +175,10 @@ a.nav:hover {
  }
 
 .post-info {
-   padding: 0 0.5em 0.5em 0.5em;
+   padding: 0.5em 0.5em 0.5em 0.5em;
    background: {{ site.contentBGColor }};
    border-top: solid 1px white;
+   border-bottom: groove 1px white;
    font-family: {{ site.monospaceFontFamily }};
    font-weight: bold;
  }
@@ -193,7 +198,7 @@ a.nav:hover {
   * post content */
 .col2 .post-content {
   border: solid 1px white;
-  padding: 2em;
+  padding: 1.5em;
   margin: 0;
   font-family: {{ site.contentFontFamily }};
   background: {{ site.contentBGColor }};
@@ -218,7 +223,7 @@ a.nav:hover {
 }
 
 /**
- * specifig css */
+ * specific css */
 .post-content div.warning {
   border: dashed 2px #9c5e00;
   background-color: #bdad93;
@@ -229,6 +234,7 @@ a.nav:hover {
 .col2 table.posts-by-category {
   border-collapse: collapse;
   width: 100%;
+  margin-top: 1em;
 }
 
 .col2 table.posts-by-category td {
