@@ -3,11 +3,12 @@ url: http://www.pongasoft.com/blog/yan
 permalink: pretty
 category_title_prefix: ''
 exclude: ['jkdev.sh']
+#mainColor1: '#003865'
 mainColor1: '#005a87'
 mainColor2: '#0075b0'
 contentBGColor: '#eeeeee'
 contentFGColor: 'black'
-titleBGColor: 'maroon'
+titleBGColor: '#600000'
 titleFGColor: 'white'
 contentFontFamily: 'Helvetica,Arial,sans-serif'
 monospaceFontFamily: 'Courier New,monospace'

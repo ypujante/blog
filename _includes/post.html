@@ -2,41 +2,44 @@
   {% assign post = page %}
 {% endunless %}
 <div class="post">
-  <div class="col1-and-col2">
     <div class="col1">
       <div class="col1-content">
-        {% if post.next %}
-        <table class="nav">
-          <tr>
-            <td class="nav-arrow">&larr;</td>
-            <td><a class="nav" href="{{site.url}}{{ post.next.url }}" title="{{ post.next.title }}">{{ post.next.title }}</a></td>
-          </tr>
-        </table>
-        {% endif %}
         <div class="sidebar">
-          {% include sidebar1.html %}
+          {% include sidebar.html %}
         </div>
       </div>
     </div>
-    <div class="col2">
-      <div class="post-title-content-footer">
-      <div class="post-title">{{ post.title }}</div>
-        <div class="post-info">
-          <div class="date">
-            <div class="month-day">{{post.date | date: "%b %d"}}</div>
-            <div class="year">{{post.date | date: "%Y"}}</div>
-          </div>
-          <div class="details">Posted by <a href="{{ site.url }}/about.html">Yan</a> in
-            <ul class="post-categories">
-              {% for category in post.categories %}
-              <li><a href="{{site.url}}/categories/{{category}}"
-                     title="View posts in category {{ category }}">{{ category }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
+  <div class="col2">
+    <div class="post-title-content-footer">
+      <div class="post-title">
+        {{ post.title }}
+      </div>
+      <div class="post-info">
+        <table class="nav">
+          <tr>
+            {% if post.previous %}
+            <td class="previous"><a href="{{site.url}}{{ post.previous.url }}" title="{{ post.previous.title }}"><span class="nav-arrow">&larr;</span>&nbsp;Previous</a></td>
+            {% endif %}
+            {% if post.next %}
+            <td class="next"><a href="{{site.url}}{{ post.next.url }}" title="{{ post.next.title }}">Next&nbsp;<span class="nav-arrow">&rarr;</span></a></td>
+            {% endif %}
+          </tr>
+        </table>
+        <div class="date">
+          <div class="month-day">{{post.date | date: "%b %d"}}</div>
+          <div class="year">{{post.date | date: "%Y"}}</div>
         </div>
-        <div class="post-content">
-      {{ post.content }}
+        <div class="details">Posted by <a href="{{ site.url }}/about.html">Yan</a> in
+          <ul class="post-categories">
+            {% for category in post.categories %}
+            <li><a href="{{site.url}}/categories/{{category}}"
+                   title="View posts in category {{ category }}">{{ category }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="post-content">
+        {{ post.content }}
       </div>
       <!--
       <div class="comments">
@@ -58,28 +61,14 @@
         <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>  </div>
       </div>
       -->
-      </div>
-      <div class="post-footer">
-        this is the post footer
+    </div>
+    <div class="post-footer">
+      <div class="post-footer-content">
+      &copy; 2009-2011 Yan Pujante under a <a class="nav" href="http://creativecommons.org/licenses/by/3.0/">Commons Creative license</a>.
       </div>
     </div>
   </div>
-  <div class="col3">
-    <div class="col3-content">
-      {% if post.previous %}
-      <table class="nav">
-        <tr>
-          <td><a class="nav" href="{{site.url}}{{ post.previous.url }}" title="{{ post.previous.title }}">{{ post.previous.title }}</a></td>
-          <td class="nav-arrow">&rarr;</td>
-        </tr>
-      </table>
-      {% endif %}
-      <div class="sidebar">
-        {% include sidebar2.html %}
-      </div>
-    </div>
-  </div>
+</div>
   <div class="page-footer">
-    {% include footer.html %}
-  </div>
+  {% include footer.html %}
 </div>

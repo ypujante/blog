@@ -7,30 +7,31 @@ layout: default
   {% assign posts = site.posts %}
 {% endif %}
 <div class="post">
-  <div class="col1-and-col2">
-    <div class="col1">
+  <div class="col1">
+    <div class="col1-content">
+      <div class="sidebar">
+        {% include sidebar.html %}
+      </div>
     </div>
-    <div class="col2">
-      <div class="post-title-content-footer">
-        <div class="post-title">Br0kenB1ts - {{ page.title }}</div>
-        <div class="post-content">
-          <table class="posts-by-category">
+  </div>
+  <div class="col2">
+    <div class="post-title-content-footer">
+      <div class="post-title">Br0kenB1ts - {{ page.title }}</div>
+      <div class="post-content">
+        <table class="posts-by-category">
           {% for post in posts %}
-            <tr>
-              <td class="date">{{post.date | date: "%Y-%m-%d"}}</td>
-              <td><a class="title" href="{{ post.url }}">{{ post.title }}</a></td>
-            </tr>
+          <tr>
+            <td class="date">{{post.date | date: "%Y-%m-%d"}}</td>
+            <td><a class="title" href="{{ post.url }}">{{ post.title }}</a></td>
+          </tr>
           {% endfor %}
-          </table>
-        </div>
-      </div>
-      <div class="post-footer">
+        </table>
       </div>
     </div>
+    <div class="post-footer">
+    </div>
   </div>
-  <div class="col3">
-  </div>
-  <div class="page-footer">
-    {% include footer.html %}
-  </div>
+</div>
+<div class="page-footer">
+  {% include footer.html %}
 </div>

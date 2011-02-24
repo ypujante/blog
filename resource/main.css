@@ -9,55 +9,61 @@ html {
   background: -moz-linear-gradient(bottom,{{ site.mainColor1 }} 40%,{{ site.mainColor2 }}) fixed no-repeat 0 100%;
   background-color: {{ site.mainColor2 }};
   min-width: 800px;
+  font-family: {{ site.contentFontFamily }}
 }
 
 a:visited {
   text-decoration: none;
   color: {{ site.mainColor1 }};
-  text-shadow: 1px 1px 2px #000000;
 }
 
 a:link {
   text-decoration: none;
   color: {{ site.mainColor1 }};
-  text-shadow: 1px 1px 2px #000000;
 }
 
 a:hover {
   text-decoration: underline;
   color: {{ site.mainColor1 }};
-  text-shadow: 1px 1px 2px #000000;
 }
+
+a.nav {
+   font-weight: bold;
+   letter-spacing: -0.1em;
+   text-shadow: 1px 1px 0 #000000;
+ }
+
+a.nav:visited {
+   color: {{ site.titleFGColor }};
+ }
+
+a.nav:link {
+   color: {{ site.titleFGColor }};
+ }
+
+a.nav:hover {
+   text-decoration: none;
+   color: {{ site.titleBGColor }};
+ }
 
 /***********************************
- * 3 column layout + fixed footer
+ * 2 column layout + fixed footer
  ***********************************/
-.col1-and-col2 {
-  float: left;
-  width: 80%;
+.post {
+  margin: 1em;
 }
-
 .col1 {
   float: left;
-  width: 20%;
+  width: 30%;
 }
 
 .col2 {
   float: right;
-  width: 80%;
+  width: 70%;
 }
 
 .col1-content {
-  margin-right: 1em;
-}
-
-.col3 {
-  float: right;
-  width: 20%;
-}
-
-.col3-content {
-  margin-left: 1em;
+  margin: 0 2em 0 0;
 }
 
 .col2 .post-footer {
@@ -80,45 +86,28 @@ a:hover {
   padding: 1em 0 0 1em;
 }
 
-/*****************************
- * navigation in col1 & col3
- *****************************/
-a.nav {
-   font-family: {{ site.monospaceFontFamily }};
-   font-weight: bold;
-   letter-spacing: -0.1em;
-   text-shadow: 1px 1px 0 #000000;
- }
-
- a.nav:visited {
-   text-decoration: none;
-   color: {{ site.titleFGColor }};
- }
-
- a.nav:link {
-   text-decoration: none;
-   color: {{ site.titleFGColor }};
- }
-
- a.nav:hover {
-   text-decoration: none;
-   color: {{ site.titleBGColor }};
- }
-
-table.nav {
-  border-bottom: dotted 1px black;
-  margin-bottom: 1em;
-}
-
- td.nav-arrow {
-   color: {{ site.titleFGColor }};
-   font-size: 1.5em;
-   text-shadow: 1px 1px 0 #000000;
- }
-
 /**************
  * col2
  **************/
+/**
+ * navigation / prev/next */
+ table.nav {
+   width: 100%;
+   margin: 0;
+   padding: 0;
+ }
+
+ table.nav td.next {
+   text-align: right;
+ }
+
+ table.nav td {
+   font-size: 0.8em;
+ }
+
+ .nav-arrow {
+    font-size: 1.5em;
+ }
 
 /**
  * post title */
@@ -172,7 +161,7 @@ table.nav {
  }
 
 .post-info {
-   padding: 0.5em;
+   padding: 0 0.5em 0.5em 0.5em;
    background: {{ site.contentBGColor }};
    border-top: solid 1px white;
    font-family: {{ site.monospaceFontFamily }};
@@ -231,20 +220,17 @@ table.nav {
   padding-right: 0.5em;
 }
 
-/*.col2 table.posts-by-category td a.title:visited {*/
-  /*color: #000000;*/
-  /*text-decoration: none;*/
-/*}*/
+/**
+ * post footer */
+.post-footer {
+ color: {{ site.contentFGColor }};
+ text-align: center;
+ padding-top: 2em;
+}
 
-/*.col2 table.posts-by-category td a.title:link {*/
-  /*color: #000000;*/
-  /*text-decoration: none;*/
-/*}*/
-
-/*.col2 table.posts-by-category td a.title:hover {*/
-  /*color: {{ site.titleBGColor }};*/
-  /*text-decoration: none;*/
-/*}*/
+.post-footer-content {
+  font-size: 0.8em;
+}
 
 /***********************************
  * sidebar
@@ -270,6 +256,32 @@ table.nav {
   background: {{ site.contentBGColor }};
   margin: 0;
   padding: 0.5em;
+}
+
+.sidebar .entry dd ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.sidebar .entry dd ul li {
+  border-bottom: dotted 1px #aaaaaa;
+  margin-bottom: 0.2em;
+}
+
+/**
+ * bypassing twitter css */
+div.twtr-doc {
+  border-color: {{ site.contentBGColor }} {{ site.contentBGColor }} white;
+  border-style: solid solid none;
+  border-width: 1px;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  border-top-left-radius: 0 0;
+  border-top-right-radius: 0 0;
+  border-bottom-right-radius: 0 0;
+  border-bottom-left-radius: 0 0;  
 }
 
 /***************
