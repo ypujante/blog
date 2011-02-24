@@ -198,6 +198,7 @@ a.nav:hover {
   * post content */
 .col2 .post-content {
   border: solid 1px white;
+  border-bottom: groove 1px white;
   padding: 1.5em;
   margin: 0;
   font-family: {{ site.contentFontFamily }};
@@ -241,6 +242,15 @@ a.nav:hover {
   white-space: nowrap;
   border-bottom: dotted 1px #aaaaaa;
   padding-right: 0.5em;
+}
+
+/**
+ * post comments */
+.post-comments {
+  color: {{ site.contentFGColor }};
+  background: {{ site.contentBGColor }};
+  padding: 1.5em;
+  border: solid 1px white;
 }
 
 /**
