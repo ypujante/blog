@@ -7,13 +7,28 @@
 	<title>Br0kenB1ts | {{ page.title }}</title>
   <link rel="stylesheet" href="{{ site.url}}/resource/main.css"/>
   <link rel="stylesheet" href="{{ site.url}}/resource/highlight.css"/>
+{% if site.withTweeter and site.prodMode %}
   <script type="text/javascript" src="http://widgets.twimg.com/j/2/widget.js"></script>
+{% endif %}
 </head>
 
 <body>
   <div id="page-content">
     {{ content }}
   </div>
+{% if site.withGoogle and site.prodMode %}
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-8362808-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+{% endif %}
+{% if site.withLinkedIn and site.prodMode %}
   <script type="text/javascript" src="http://www.linkedin.com/js/public-profile/widget-os.js"></script>
+{% endif %}
 </body>
 </html>

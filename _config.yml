@@ -1,9 +1,11 @@
+# jekyll related entries
 pygments: true
 url: http://www.pongasoft.com/blog/yan
 permalink: pretty
 category_title_prefix: ''
 exclude: ['jkdev.sh']
-#mainColor1: '#003865'
+
+# css related entries
 mainColor1: '#005a87'
 mainColor2: '#0075b0'
 contentBGColor: '#eeeeee'
@@ -13,3 +15,10 @@ titleFGColor: 'white'
 contentFontFamily: 'Helvetica,Arial,sans-serif'
 monospaceFontFamily: 'Courier New,monospace'
 dateBackgroundColor: '#888888'
+
+# post related entries
+withLinkedIn: true
+withTweeter: true
+withComments: true
+withGoogle: true
+prodMode: true
