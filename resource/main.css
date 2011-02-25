@@ -47,7 +47,7 @@ a.nav:hover {
  }
  
  tt, code {
-   background: #cccccc;
+   background: #dcdcdc;
  }
 
 /***********************************
@@ -56,6 +56,12 @@ a.nav:hover {
 .post {
   margin: 1em;
 }
+
+.post-spacer {
+  clear: both;
+  margin-bottom: 12em; /* accounting for fixed footer */
+}
+
 .col1 {
   float: left;
   width: 30%;
@@ -68,10 +74,6 @@ a.nav:hover {
 
 .col1-content {
   margin: 0 2em 0 0;
-}
-
-.col2 .post-footer {
-  min-height: 12em;
 }
 
 .page-footer {
@@ -333,6 +335,10 @@ div.twtr-doc {
   border-top-right-radius: 0 0;
   border-bottom-right-radius: 0 0;
   border-bottom-left-radius: 0 0;  
+}
+
+.contact-email {
+  font-style: italic;
 }
 
 /***************

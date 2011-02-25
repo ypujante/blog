@@ -14,7 +14,7 @@ After releasing several <a href="https://www.github.com/linkedin">open-source pr
 In order to publish your artifacts to maven central via Sonatype (unclear if there is another way to be honest), you need to follow the <a href="https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide">instructions</a> on how to set it up (you need to create a <a href="https://issues.sonatype.org/browse/OSSRH">Jira Ticket</a>). You also need to have a pgp key and if you don't, you can follow these <a href="http://www.sonatype.com/people/2010/01/how-to-generate-pgp-signatures-with-maven/">instructions</a>.
 
 Using gradle, you can simply create a maven compatible layout of your artifacts:
-<pre>
+{% highlight java %}
 // example for one of my project
 uploadArchives {
   repositories {
@@ -23,19 +23,19 @@ uploadArchives {
     pom.whenConfigured { pomToConfigure ->
       pomToConfigure.project {
         name project.name
-        description 'A useful set of gradle plugins'
-        url 'http://github.com/linkedin/gradle-plugins'
+        description "A useful set of gradle plugins"
+        url "http://github.com/linkedin/gradle-plugins"
         licenses {
           license {
-            name 'The Apache Software License, Version 2.0'
-            url 'http://www.apache.org/licenses/LICENSE-2.0'
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0"
           }
         }
         developers {
           developer {
-            id 'ypujante'
-            name 'Yan Pujante'
-            email 'yan@pongasoft.com'
+            id "ypujante"
+            name "Yan Pujante"
+            email "yan@pongasoft.com"
           }
         }
         scm {
@@ -47,12 +47,12 @@ uploadArchives {
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 Note that a big part of the previous code is setting up the right information in the pom file to comply with the set of <a href="https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-6.CentralSyncRequirement">requirements</a>. Also note that you do <b>not</b> need to use gradle at all as long as you generate a maven compatible layout (with pom files).
 
 You can then use the script I have 'gisted' on github: <a href="https://gist.github.com/708980">maven_staging_upload.groovy</a>. The script simply takes the pom files you want to upload as an input and will prompt you for your pgp passphrase only once! Make sure you follow the initial setup:
-<pre>
+{% highlight java %}
 /**
  * This script uploads all your artifacts to maven.
  * 
@@ -62,23 +62,23 @@ You can then use the script I have 'gisted' on github: <a href="https://gist.git
  *   (http://www.sonatype.com/people/2010/01/how-to-generate-pgp-signatures-with-maven/)
  * - maven is installed and available in the path
  * - you have defined the proper server section in your ~/.m2/settings.xml file:
- *   &lt;settings&gt;
+ *   <settings>
  *    ...
- *    &lt;servers&gt;
- *       &lt;server&gt;
- *        &lt;id&gt;nexus-releases&lt;/id&gt;
- *        &lt;username&gt;ypujante&lt;/username&gt;
- *        &lt;password&gt;********&lt;/password&gt;
- *       &lt;/server&gt;
- *     &lt;/servers&gt;
+ *    <servers>
+ *       <server>
+ *        <id>nexus-releases</id>
+ *        <username>ypujante</username>
+ *        <password>********</password>
+ *       </server>
+ *     </servers>
  *    ...
- *   &lt;/settings&gt;
+ *   </settings>
  *
  * You run the script this way: groovy maven_staging_upload.groovy pathToPomFile1 pathToPomFile2...
  *
  * groovy
  */
-</pre>
+{% endhighlight %}
 
 You then need to login to <a href="https://oss.sonatype.org/index.html#welcome">Nexus</a> to verify that the upload worked properly. You can then close the staging repository and release it. It will make its way to maven central shortly. The very first time, you need to <a href="https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-9.ActivateCentralSync">activate central sync</a>!
 

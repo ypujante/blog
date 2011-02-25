@@ -11,11 +11,13 @@ My main application is a web application and is deployed in tomcat under <tt>[/j
 
 <h3>Configuring tomcat (Part I)</h3>
 On the tomcat side, I setup a new connector for <a href="http://tomcat.apache.org/tomcat-6.0-doc/connectors.html">ajp</a> (file <tt>/etc/tomcat6/server.xml</tt>):
-<pre>
-&lt!-- Define an AJP 1.3 Connector on port 8009 --&gt;
-&lt;Connector port="8009" protocol="AJP/1.3" redirectPort="8010" 
-           proxyname="www.kiwidoc.com" proxyPort="80" URIEncoding="UTF-8"/&gt;
-</pre>
+{% highlight xml %}
+<!-- Define an AJP 1.3 Connector on port 8009 -->
+<Connector port="8009" protocol="AJP/1.3" redirectPort="8010"
+           proxyname="www.kiwidoc.com" proxyPort="80"
+           URIEncoding="UTF-8"/>
+{% endhighlight %}
+  
 I chose ajp because it is supposed to be much faster than standard http. So far the configuration is not too difficult. <tt>proxyname</tt> and <tt>proxyport</tt> are used so that the methods <a href="http://www.kiwidoc.com/java/l/p/javax.servlet/servlet-api/2.5/p/javax.servlet/c/ServletRequest#getRemoteHost%28%29">ServletRequest.getRemoteHost()</a> and <a href="http://www.kiwidoc.com/java/l/p/javax.servlet/servlet-api/2.5/p/javax.servlet/c/ServletRequest#getRemotePort%28%29">ServletRequest.getRemotePort()</a> return the correct value.
 
 <h3>Configuring apache</h3>

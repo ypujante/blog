@@ -14,7 +14,7 @@ I ran into a really tricky bug which took me several months to address (the hard
 
 The (simplified) code was the following:
 
-<pre>ZooKeeper zk = ...
+{% highlight java %}ZooKeeper zk = ...
 Map<String, byte[]> state = [:]
 
 synchronized(lock) { state = trackChildren(state) }
@@ -22,7 +22,7 @@ synchronized(lock) { state = trackChildren(state) }
 // handle add/delete of children
 private Map trackChildren(Map oldState) {
   def newState = new HashMap()
-  def children = zk.getChildren('/state', childrenWatcher as Watcher)
+  def children = zk.getChildren("/state", childrenWatcher as Watcher)
   children.each { child -> 
     if(oldState[child] == null) // ADD
       trackChild(newState, "/state/${child}")
@@ -57,7 +57,7 @@ def childWatcher = { WatchedEvent event ->
     }
     if(event.type == NodeDeleted) { state.remove(child) }
   }
-}</pre>
+}{% endhighlight %}
 
 What this code essentially does is the following: 
 <ul>
@@ -78,11 +78,11 @@ From the ZooKeeper <a href="http://hadoop.apache.org/zookeeper/docs/r3.2.1/zooke
 The code I wrote seems to handle #1 perfectly. On the other end, it does not handle #2 properly and this is where the bug gets triggered.
 
 I ran into a situation where a server would delete and rewrite the data very fast:
-<pre>
+{% highlight java %}
 byte[] child1State = ...
-zk.delete('/state/child1', -1)
-zk.setData('/state/child1', child1State, -1)
-</pre>
+zk.delete("/state/child1", -1)
+zk.setData("/state/child1", child1State, -1)
+{% endhighlight %}
 
 In this scenario, I would receive 2 events:
 <ol>
@@ -91,12 +91,12 @@ In this scenario, I would receive 2 events:
 </ol>
 
 With the following code on the server side:
-<pre>
+{% highlight java %}
 byte[] child1State = ...
-zk.delete('/state/child1', -1)
+zk.delete("/state/child1", -1)
 Thread.sleep(5000)
-zk.setData('/state/child1', child1State, -1)
-</pre>
+zk.setData("/state/child1", child1State, -1)
+{% endhighlight %}
 </li>
 I actually get 2 events and I have enough time to process them so it works. But that is clearly not the right fix.
 
@@ -106,21 +106,20 @@ In order to fix the problem, I did 2 things:
   <li>The child watcher handles 'DELETE' but also tries to set a watcher no matter what</li>
 </ol>
 
-<pre>ZooKeeper zk = ...
+{% highlight java %}ZooKeeper zk = ...
 Map<String, byte[]> state = [:]
 
 synchronized(lock) { state = trackChildren(state) }
-<span style="background: yellow; font-weight:bold;">
 // handle ADD only... let the children watcher handle DELETE
 private Map trackChildren(Map oldState) {
   def newState = new HashMap(oldState)
-  def children = zk.getChildren('/state', childrenWatcher as Watcher)
+  def children = zk.getChildren("/state", childrenWatcher as Watcher)
   children.each { child -> 
     if(newState[child] == null) 
       trackChild(newState, "/state/${child}")
   }
   return newState
-}</span>
+}
 
 // handle child update
 private void trackChild(Map newState, String path)
@@ -140,14 +139,17 @@ def childrenWatcher = { WatchedEvent event ->
 def childWatcher = { WatchedEvent event -> 
   def child = event.path ? new File(event.path).name : null
   synchronized(lock) {
-    if(event.type == EventType.NodeDataChanged) { trackChild(state, event.path) }
+    if(event.type == EventType.NodeDataChanged) {
+      trackChild(state, event.path)
+    }
     if(event.type == NodeDeleted) { 
       state.remove(child)
-<span style="background: yellow;font-weight:bold;">      // WARNING!!! UNINTUITIVE BUT CRITICAL!!!
-      trackChild(state, event.path)</span>
+      // WARNING!!! UNINTUITIVE BUT CRITICAL!!!
+      trackChild(state, event.path)
+      // WARNING!!! UNINTUITIVE BUT CRITICAL!!!
     }
   }
-}</pre>
+}{% endhighlight %}
 
 The code (in the childWatcher) most likely looks very unintuitive, but what is really happening in this case, is that the child on which the watcher is set will always receive the <tt>NodeDeleted</tt> event and according to key concept #1, if you want to be able to receive further events you need to set another watcher. It seems unintuitive to set a watcher on a node that just got deleted (and most of the time it will trigger a <tt>NoNodeException</tt> which is handled properly), but between the time the node was deleted and the time you check, it may very well have been recreated in which case you guarantee that you will have a watcher set on it and you won't loose it. If the node was deleted and not recreated right away, then the childrenWatcher will be the one setting it up again in the future if it gets recreated (pay close attention to the synchronization in the code as it is pretty critical for the system to work properly). Here is an example:
 
