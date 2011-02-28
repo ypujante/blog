@@ -43,6 +43,7 @@
                    title="View posts in category {{ category }}">{{ category }}</a></li>
             {% endfor %}
           </ul>
+          | <a href="{{site.url}}{{ post.url }}#disqus_thread" data-disqus-identifier="{{ post.id }}"></a>
         </div>
       </div>
       <div class="post-content">
@@ -54,7 +55,7 @@
       <div id="disqus_thread"></div>
       <script type="text/javascript">
           var disqus_shortname = 'brokenbits';
-          // var disqus_developer = 1; // developer mode is on
+          var disqus_developer = 1; // developer mode is on
           var disqus_identifier = '{{ post.id }}';
           var disqus_url = '{{site.url}}{{ post.url }}';
 
@@ -64,6 +65,12 @@
               dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
               (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
           })();
+          (function () {
+            var s = document.createElement('script'); s.async = true;
+            s.type = 'text/javascript';
+            s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+            (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+          }());
       </script>
       <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
       <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
