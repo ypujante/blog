@@ -31,7 +31,7 @@ layout: default
           {% for post in posts %}
           <tr>
             <td class="date">{{post.date | date: "%Y-%m-%d"}}</td>
-            <td><a class="title" href="{{ post.url }}">{{ post.title }}</a></td>
+            <td><a class="title" href="{{site.url}}{{ post.url }}">{{ post.title }}</a></td>
           </tr>
           {% endfor %}
         </table>

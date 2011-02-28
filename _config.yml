@@ -3,7 +3,7 @@ pygments: true
 url: http://www.pongasoft.com/blog/yan
 permalink: pretty
 category_title_prefix: ''
-exclude: ['jkdev.sh']
+exclude: ['jkdev.sh', 'brokenbits-blog.iml']
 
 # css related entries
 mainColor1: '#005a87'
