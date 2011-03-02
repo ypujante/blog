@@ -50,6 +50,10 @@ a.nav:hover {
    background: #dcdcdc;
  }
 
+.hidden {
+  display: none;
+}
+
 /***********************************
  * 2 column layout + fixed footer
  ***********************************/

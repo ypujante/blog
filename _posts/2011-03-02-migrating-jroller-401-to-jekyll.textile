@@ -1,0 +1,148 @@
+---
+layout: post
+title: Migrating my blog from JRoller 4.0.1 to Jekyll
+category: misc
+tags:
+ - ruby
+ - jekyll
+ - blog
+---
+Let's face it, JRoller is dead. Like many others I have decided to move my blog away from it. I have decided to use "Jekyll":http://jekyllrb.com/ because it basically generates a static website so I don't need a java web server or a database to run my blog. The main issue of course is comments but there is a solution for this as well: "Disqus":http://disqus.com/. This post relates my experience.
+
+h3. Extracting content from JRoller 4.0.1
+
+The biggest problem to solve is how to extract the blog posts from JRoller including the comments. This is how I did it:
+
+# Add a new template
+In the roller interface, under the _Design_ tab,  _Templates_ subtab, I added a template. The template looks like this:
+{% highlight xml %}<?xml version="1.0" encoding="UTF-8"?>
+<posts>
+#set($entries = $model.weblog.getRecentWeblogEntries('nil', 100))
+#foreach( $entry in $entries )
+  <post id="$entry.id" permalink="$utils.escapeXML($entry.permalink)" title="$utils.escapeXML($entry.title)" date="$utils.formatIso8601Date($entry.pubTime)" tags="$utils.escapeXML($entry.tagsAsString)" category="$utils.escapeXML($entry.category.name)">
+    <content>$utils.escapeXML($entry.displayContent)</content>
+    #set($comments = $entry.getComments(true, true))
+    <comments>
+    #foreach( $comment in $comments )
+      <comment name="$utils.escapeXML($comment.name)" email="$utils.escapeXML($comment.email)" url="$utils.escapeXML($comment.url)" remoteHost="$utils.escapeXML($comment.remoteHost)" date="$utils.formatIso8601Date($comment.postTime)">
+        <content>$utils.escapeXML($comment.content)</content>
+      </comment>
+    #end
+    </comments>
+  </post>
+#end
+</posts>{% endhighlight %}
+# Export the content
+Note that on the page there is a text field called _Link_ and a link below. Simply use this link to export the content:
+{% highlight bash %}
+curl <link> > blog.xml
+{% endhighlight %}
+
+Now I have a file called <code>blog.xml</code> which contains all my data.
+
+h3. Generating content for Jekyll
+
+Jekyll requires you to create a specific directory structure with all your posts under a folder called <code>_posts</code> with a specific naming convention. To generate the content I wrote a simple groovy script available on "github":https://gist.github.com/851246 (you may need to tweak the script for your own needs). The script uses the <code>blog.xml</code> file previously generated and creates one file per blog post. It uses the _permalink_ tag so that the final link is the same as it was with JRoller!
+
+Click to view: <a href="#" onclick="toggleShowHide('gist-851246');return false;"><code>jroller401_to_jekyll.groovy</code></a>
+
+<div id="gist-851246" class="hidden"><script src="https://gist.github.com/851246.js?file=jroller401_to_jekyll.groovy"></script></div>
+
+h3. Importing comments in Disqus
+
+"Disqus":http://disqus.com is a third party website which can host your comments. Thankfully the service has the capability to import comments formatted in WPR xml format (which is a wordpress xml representation). I also wrote a simple groovy script to do the job. It is available on "github":https://gist.github.com/851313. The script uses the <code>blog.xml</code> file previously generated and ouputs the xml document.
+
+Click to view: <a href="#" onclick="toggleShowHide('gist-851313');return false;"><code>jroller401_to_disqus.groovy</code></a>
+
+<div id="gist-851313" class="hidden"><script src="https://gist.github.com/851313.js?file=jroller401_to_disqus.groovy"></script></div>
+
+h3. Final touches
+
+Once the data was out of JRoller and in Jekyll and Disqus, I spent a lot of time (way too much :)), redesigning the blog, making it more up to date and adding a new social twist to it, integrating with Twitter and LinkedIn. In a way it is more dynamic than it ever was. Here are several interesting things I had to do with Jekyll:
+
+h4. 1. Listing Categories
+
+Although Jekyll supports the notion of categories, there is no native support to generate category pages. For this I used the "generate_categories.rb":http://recursive-design.com/projects/jekyll-plugins plugin. I had to _enhance_ the plugin to list the categories (why isn't it something that Jekyll offers by default is beyond me...): you can view my enhancement "here":https://github.com/ypujante/blog/blob/master/_plugins/generate_categories.rb
+
+{% highlight ruby %}
+# Yan addition: accessing the list of categories
+alias orig_site_payload site_payload
+
+def site_payload
+  h = orig_site_payload
+  payload = h["site"]
+  payload["categories_list"] = payload["categories"].keys.sort
+  h
+end
+{% endhighlight %}
+
+Then I can simply use <code>site.categories_list</code> in my code.
+
+h4. 2. Dynamic css
+
+Any file in Jekyll can be processed as a template file. This is what I did with my css: I defined various values in my config file:
+
+{% highlight yaml %}
+# css related entries
+mainColor1: '#005a87'
+mainColor2: '#0075b0'
+contentBGColor: '#eeeeee'
+contentFGColor: 'black'
+titleBGColor: '#600000'
+titleFGColor: 'white'
+contentFontFamily: 'Helvetica,Arial,sans-serif'
+monospaceFontFamily: 'Courier New,monospace'
+dateBackgroundColor: '#888888'
+{% endhighlight %}
+
+and simply use them in my css file:
+
+{% highlight text %}
+---
+---
+a:visited {
+  text-decoration: none;
+  color: {{ "{{" }} site.mainColor1 }};
+}
+{% endhighlight %}
+
+Of course my css editor is unhappy about the invalid syntax but it totally works. The first 2 lines are the marker to tell Jekyll to process this file as a template and are very important. You can take a look at the "css":https://github.com/ypujante/blog/blob/master/resource/main.css file.
+
+h4. 3. Reusing the post layout
+
+I wanted that the latest blog post, displayed on the home page, look exactly the same as it looks on each individual blog page without having to copy/paste the code. For this I used an include but it is pretty tricky (I literally spent a full day on this :(). Here is how I did it:
+
+{% highlight text %}
+_layouts/post.html:
+# the post.html layout simply includes another template
+---
+layout: default
+---
+{{ "{%"}} include post_include.html %}
+
+
+index.html:
+# the index.html main home page includes the same template
+{{ "{%"}} for post in site.posts limit:1 %}
+{{ "{%"}} include post_include.html %}
+{{ "{%"}} endfor %}
+
+
+_includes/post_include.html:
+# now for the tricky part: the template needs to have some conditional!
+{{ "{%"}} unless post %}
+  {{ "{%"}} assign post = page %}
+{{ "{%"}} else %}
+  {{ "{%"}} assign content = post.content %}
+{{ "{%"}} endunless %}
+<div class="post-title">
+  {{ "{{" }} post.title }}
+</div>
+<div class="post-content">
+  {{ "{{" }} content }}
+</div>
+{% endhighlight %}
+
+h3. Source code
+
+The entire source code of this blog is available on "github":https://github.com/ypujante/blog and is available under a "Commons Creative license":http://creativecommons.org/licenses/by/3.0/.

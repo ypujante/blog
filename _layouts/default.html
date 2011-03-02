@@ -7,6 +7,33 @@
 	<title>Br0kenB1ts | {{ page.title }}</title>
   <link rel="stylesheet" href="{{ site.url}}/resource/main.css"/>
   <link rel="stylesheet" href="{{ site.url}}/resource/highlight.css"/>
+  <script type="text/javascript">
+  function hasClass(ele,cls) {
+  	return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+  }
+  function addClass(ele,cls) {
+  	if (!hasClass(ele,cls)) ele.className += " "+cls;
+  }
+  function removeClass(ele,cls) {
+  	if (hasClass(ele,cls)) {
+  		var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+  		ele.className=ele.className.replace(reg,' ');
+  	}
+  }
+  function _toggleShowHide(container) {
+    if(hasClass(container, 'hidden'))
+    {
+      removeClass(container, 'hidden');
+    }
+    else
+    {
+      addClass(container, 'hidden');
+    }
+  }
+  function toggleShowHide(containerId) {
+    _toggleShowHide(document.getElementById(containerId));
+  }
+  </script>
 {% if site.withTweeter and site.prodMode %}
   <script type="text/javascript" src="http://widgets.twimg.com/j/2/widget.js"></script>
 {% endif %}
