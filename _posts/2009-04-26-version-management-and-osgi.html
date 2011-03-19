@@ -21,7 +21,7 @@ In OSGi you define your dependencies using headers in the Manifest. There are se
 <li>When defining a dependency, you can use a version or a version range.</li>
 </ul>
 
-<div class="warning" style="padding:10px"><img src="{{ site.url }}/resource/warning_21x21.gif" alt="warning_21x21.gif" border="0" width="21" height="21" />
+<div class="warning"><img src="{{ site.url }}/resource/warning_48x48.png" alt="warning_48x48.png" border="0" width="21" height="21" />
 Counter intuitively, defining:
 <pre>version=1.0.0</pre>
 <p>does not mean that you depend on version 1.0.0, but it means that you depend on 1.0.0+ meaning anything greater than (or equal to) 1.0.0 will match!</p>
@@ -92,7 +92,7 @@ api-3.1.0: lib;version=[2.1.0,2.1.1)</pre>
 <div align="center"><img src="{{ site.url }}/resource/OSGi_Version3.1.0_max_lockdown.png" alt="Version3.1.0_max_lockdown.png" border="0" width="427" height="396" /></div>
 
 <p>
-<div class="warning" style="padding:10px"><img src="{{ site.url }}/resource/warning_21x21.gif" alt="warning_21x21.gif" border="0" width="21" height="21" />
+<div class="warning"><img src="{{ site.url }}/resource/warning_48x48.png" alt="warning_48x48.png" border="0" width="21" height="21" />
 In this scenario, client1 is fine, but client2 is not: due to the way class loading happens, client2 cannot see the new service.</div>
 </p>
 

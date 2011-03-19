@@ -1,0 +1,258 @@
+---
+layout: post
+title: Building a monitoring solution with glu
+category: glu
+tags:
+ - glu
+ - devops
+ - monitoring
+ - groovy
+---
+h3. Introduction
+
+"glu":https://www.github.com/linkedin/glu is a deployment automation platform which allows you to easily and efficiently deploy applications on many hosts. In the glu model, there is an active agent (aka, the glu agent) running on each host. Since this agent is always up and running on the host, it can be used to monitor the host itself and/or the applications running on it. By using the _timers_ feature of the agent and ZooKeeper, it is possible to build a very solid monitoring solution by reusing the infrastructure already in place for glu.
+
+h3. glu agent _timers_
+
+The _timers_ feature of the glu agent allows you to schedule a timer, defined by a piece of code (a closure), which is executed at regular intervals. The agent manages timers appropriately, taking care of running them for you and restarting them in the event that the agent restarts. The full api of the timers feature can be found on "github":https://github.com/linkedin/glu/blob/master/agent/org.linkedin.glu.agent-api/src/main/groovy/org/linkedin/glu/agent/api/Timers.groovy. Here is how you schedule and cancel a timer in a glu script:
+
+{% highlight java %}
+class MonitorScript
+{
+  def monitor = {
+    // code that will run every 5s
+ }
+
+ def start = {
+   timers.schedule(timer: monitor, repeatFrequency: "5s")
+ }
+
+ def stop = {
+   timers.cancel(timer: monitor)
+  }
+}
+{% endhighlight %}
+
+The code defined in the _monitor_ closure will be executed with the frequency defined at scheduling time until cancelled.
+
+h3. Adding monitoring code to the script
+
+Now that we have timer, we can add the monitoring code. For the sake of this blog post, we will simply execute the <code>uptime</code> shell command.
+
+{% highlight java %}
+class MonitorScript
+{
+  def monitor = {
+    log.info shell.exec("uptime")
+ }
+
+ def start = { timers.schedule(timer: monitor, repeatFrequency: "5s") }
+ def stop = { timers.cancel(timer: monitor) }
+}
+{% endhighlight %}
+
+Here is the result of running this script: every 5 seconds, a message containing the output of the <code>uptime</code> command gets displayed in the agent log file.
+
+!{{ site.url }}/resource/images/2011-03-18/monitor-uptime-1.png(uptime running inside the agent)!
+
+h3. Detecting and reporting errors from within the script
+
+We can add logic to the script to change the state based on the result of the command (using the "stateManager":https://github.com/linkedin/glu/blob/master/agent/org.linkedin.glu.agent-api/src/main/groovy/org/linkedin/glu/agent/api/StateManager.groovy). The state will automatically be reported in ZooKeeper and propagated to the console.
+
+{% highlight java %}
+class MonitorScript
+{
+  static String CMD = 
+    "uptime | grep -o '[0-9]\\+\\.[0-9]\\+*' | xargs"
+
+  def monitor = {
+    // capturing current state
+    def currentError = stateManager.state.error
+    def newError = null
+    def uptime = shell.exec(CMD)
+    def load = uptime.split()
+    // check for load (provided optionally as an init parameter)
+    if((load[0] as float) >= ((params.maxLoad ?: 4.0) as float))
+        newError = "High load detected..."
+    // change the state when currentError != newError
+    if(currentError != newError)
+      stateManager.forceChangeState(null, newError)
+ }
+ 
+ def start = { timers.schedule(timer: monitor, repeatFrequency: "5s") }
+ def stop = { timers.cancel(timer: monitor) }
+}
+{% endhighlight %}
+
+In the console, you simply add this entry for each agent (in the model):
+
+{% highlight text %}
+{
+  "agent": "agent-1",
+  "initParameters": {"maxLoad": 1.0},
+  "mountPoint": "/monitor",
+  "script": "http://localhost:8080/glu/repository/scripts/MonitorScript.groovy",
+  "tags": ["monitor"]
+}
+{% endhighlight %}
+
+Note how I set the <code>maxLoad</code> parameter to 1.0 for being able to test more easily.
+
+When the load is normal, the console dashboard looks like this:
+!{{ site.url }}/resource/images/2011-03-18/monitor-normal-dashboard.png(Everything is fine)!
+
+As soon as the load is too high, the console looks like this:
+!{{ site.url }}/resource/images/2011-03-18/monitor-high-load-dashboard.png(Everything is fine)!
+
+h3. Making monitoring information available to ZooKeeper
+
+We have seen how we can change the state so that it gets reported right away in the console. This is fine, and it also means that the detection logic lives in the script. If we want to be able to do more sophisticated monitoring (trending, etc...) the logic needs to live outside the glu script. We still want the script to collect the monitoring data and simply make it available so that an external process can consume it. This is actually trivial to do:
+
+{% highlight java %}
+class MonitorScript
+{
+  static String CMD = 
+    "uptime | grep -o '[0-9]\\+\\.[0-9]\\+*' | xargs"
+
+  // load is automatically available in ZooKeeper
+  def load    
+
+  def monitor = {
+    def currentError = stateManager.state.error
+    def newError = null
+    def uptime = shell.exec(CMD)
+    
+    // load is simply assigned to the field rather than a 
+    // local variable
+    load = uptime.split()
+    
+    if((load[0] as float) >= ((params.maxLoad ?: 4.0) as float))
+        newError = "High load detected..."
+    if(currentError != newError)
+      stateManager.forceChangeState(null, newError)
+ }
+ 
+ def start = { timers.schedule(timer: monitor, repeatFrequency: "5s") }
+ def stop = { timers.cancel(timer: monitor) }
+}
+{% endhighlight %}
+
+The code is almost identical: the only difference is that we simply use a field rather than a local variable! 
+
+<div class="info"><img src="{{ site.url }}/resource/info_48x48.png" alt="info_48x48.png" border="0" width="21" height="21" /> In the glu world, all fields are automatically made available to ZooKeeper.</div>
+
+We can verify that it makes it in the console:
+!{{ site.url }}/resource/images/2011-03-18/monitor-load-zk.png(Load in the console through ZooKeeper)!
+
+In this screenshot, everything below 'View Details' is coming directly from ZooKeeper. We can see the error message set by the script because it detected a high load, as well as the load itself. Note how the load is actually an array (under the cover the representation is json). This entry will change every time the timer executes (unless the load does not change of course).
+
+h3. Collecting and processing the monitoring data
+
+As we have seen the data makes it in ZooKeeper. The fact that you can view it in the console is nice, but if you want to process the data, you can write an external program that will connect directly to ZooKeeper. You can reuse the convenient class that the console uses: "AgentsTracker":https://github.com/linkedin/glu/blob/master/agent/org.linkedin.glu.agent-tracker/src/main/groovy/org/linkedin/glu/agent/tracker/AgentsTracker.groovy and register a set of listeners to be notified when things change.
+
+{% highlight java linenos %}
+public class MonitorMain
+{
+  def zk = "localhost:2181"
+  def fabric = "glu-dev-1"
+
+  void run()
+  {
+    // establishes connection to ZooKeeper
+    def zkClient = new ZKClient(zk, Timespan.parse("30s"), null)
+    zkClient.start()
+    zkClient.waitForStart(Timespan.parse("5s"))
+
+    // creates a tracker to track events in ZooKeeper
+    String zkAgentRoot = "/org/glu/agents/fabrics/${fabric}".toString()
+    def tracker = new AgentsTrackerImpl(zkClient, zkAgentRoot)
+    
+    // registers the listeners
+    tracker.registerAgentListener(agentEvents as TrackerEventsListener)
+    tracker.registerMountPointListener(mountPointEvents as TrackerEventsListener)
+    tracker.registerErrorListener(errorListener as ErrorListener)
+
+    tracker.start()
+    tracker.waitForStart()
+    awaitTermination()
+  }
+
+  // track agent events (agent up or down)
+  def agentEvents = { Collection<NodeEvent<AgentInfo>> events ->
+    events.each { NodeEvent<AgentInfo> event ->
+      switch(event.eventType)
+      {
+        case NodeEventType.ADDED:
+        case NodeEventType.UPDATED:
+          // ignoring add/update event
+          break
+        case NodeEventType.DELETED:
+          log.warn "Detected agent down: ${event.nodeInfo.agentName}"
+        break
+      }
+    }
+  }
+
+  // track mountPoint events
+  def mountPointEvents = { Collection<NodeEvent<MountPointInfo>> events ->
+    events.each { NodeEvent<MountPointInfo> event ->
+      // only interested in the monitor events (/monitor was defined in 
+      // the console entry)
+      if(event?.nodeInfo?.mountPoint == MountPoint.fromPath("/monitor"))
+      {
+        switch(event.eventType)
+        {
+          case NodeEventType.ADDED:
+          case NodeEventType.UPDATED:
+            log.info "${event.nodeInfo.agentName} |" +
+               "${event.nodeInfo.data?.scriptState?.script?.load?.join(',')}"
+            break
+          case NodeEventType.DELETED:
+            // ignoring delete event
+          break
+        }
+      }
+    }
+  }
+  
+  // when an error happens
+  def errorListener = { WatchedEvent event, Throwable throwable ->
+    log.warn("Error detected in agent with ${event}", throwable)
+  }
+{% endhighlight %}
+
+* 8-11: uses <code>ZKClient</code> to establish a connection with ZooKeeper
+* 13-23: creates a tracker, registers the listeners and starts the tracker
+* 28-41: this listener gets called back whenever an agent appears/disappears from ZooKeeper. Agents use the ephemeral node capability of ZooKeeper which means that if the agent fails for any reason (ex: machine reboots), the ephemeral node will go away and as a result this listener will be called. <div class="info"><img src="{{ site.url }}/resource/info_48x48.png" alt="info_48x48.png" border="0" width="21" height="21" /> This is a very cheap and effective way to monitor the fact that a machine is still alive.</div>
+* 44-63: this listener gets called back whenever there are changes in the mountPoints installed on any agents. For the sake of monitoring we do not care about any other but <code>/monitor</code> which is why we filter it out. The expression: <code>event.nodeInfo?.data?.scriptState?.script</code> gives access to any of the fields of the glu script and in this case we are only interested in the <code>load</code> field.
+* 66-68: this listener gets called back whenever there are any errors (ex: loss of communication with ZooKeeper)
+
+Here is the result of running this program:
+!{{ site.url }}/resource/images/2011-03-18/monitor-external.png(MonitorMain output)!
+
+Note that I intentionally killed the agent to demonstrate that I was receiving the event, which can be seen on line 5.
+
+h3. Conclusion
+
+This post shows you how to:
+
+# create a glu script which installs a timer on an agent/host
+# run a monitoring command on the host and react based on the result (change the state)
+# propagate monitoring information to ZooKeeper
+# capture and handle this information in an external program
+
+In a real monitoring solution, you probably will want to do a lot more than capturing the load and displaying it on the standard output. But the concepts will remain the same. I think the beauty of this solution relies in the fact that:
+
+# if you use glu for deployment then the infrastructure is already in place! And if you don't use glu (yet), then maybe you should consider using it as you can kill 2 birds with one stone!
+# it is event based so you get notified only when things change or in other words you don't need to ask every host what their status is: every host tell ZooKeeper what their status is and the external program is simply listening to ZooKeeper events.
+!{{ site.url }}/resource/images/2011-03-18/monitoring-conclusion.png(Monitoring Overview)!
+# it is all open source and free.
+
+h3. References
+
+* For more information about glu, check the "wiki":https://github.com/linkedin/glu/wiki. 
+* You can download glu including the tutorial from the "download page":https://github.com/linkedin/glu/downloads.
+* <a href="#" onclick="toggleShowHide('gist-877590-MonitorScript');return false;"><code>MonitorScript</code> source code</a> from github.
+<div id="gist-877590-MonitorScript" class="hidden"><script src="https://gist.github.com/877590.js?file=MonitorScript.groovy"></script></div>
+* <a href="#" onclick="toggleShowHide('gist-877590-MonitorMain');return false;"><code>MonitorMain</code> source code</a> from github.
+<div id="gist-877590-MonitorMain" class="hidden"><script src="https://gist.github.com/877590.js?file=MonitorMain.groovy"></script></div>
