@@ -241,7 +241,7 @@ This post shows you how to:
 # propagate monitoring information to ZooKeeper
 # capture and handle this information in an external program
 
-In a real monitoring solution, you probably will want to do a lot more than capturing the load and displaying it on the standard output. But the concepts will remain the same. I think the beauty of this solution relies in the fact that:
+In a real monitoring solution, you probably will want to do a lot more than capturing the load and displaying it on the standard output. But the concepts will remain the same. I think the beauty of this solution lies in the fact that:
 
 # if you use glu for deployment then the infrastructure is already in place! And if you don't use glu (yet), then maybe you should consider using it as you can kill 2 birds with one stone!
 # it is event based so you get notified only when things change or in other words you don't need to ask every host what their status is: every host tell ZooKeeper what their status is and the external program is simply listening to ZooKeeper events.
