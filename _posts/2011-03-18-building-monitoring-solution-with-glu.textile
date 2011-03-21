@@ -4,6 +4,7 @@ title: Building a monitoring solution with glu
 category: glu
 tags:
  - glu
+ - zookeeper
  - devops
  - monitoring
  - groovy
