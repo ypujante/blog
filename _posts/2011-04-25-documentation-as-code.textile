@@ -1,0 +1,107 @@
+---
+layout: post
+title: "How to treat documentation as code: gradle + sphinx"
+category: glu
+tags:
+ - glu
+ - gradle
+ - sphinx
+ - devops
+ - github
+ - documentation
+---
+h2. Introduction
+
+About a month ago, I embarked on a complete rewrite of the glu documentation (here is the "result":http://linkedin.github.com/glu/docs/latest/html/index.html). The first iteration of the documentation was created using the wiki hosted on github, alongside the "source code":https://github.com/linkedin/glu.
+
+I was not very happy with this solution for several reasons:
+
+* I knew that writing the documentation was going to be a pretty big effort and I did not want to have the wiki broken as I was writing it
+<div class="info"><img src="{{ site.url }}/resource/info_48x48.png" alt="info_48x48.png" border="0" width="21" height="21" /> You can argue that the wiki on github is managed, under the cover, as a git repository and that you can check it out locally, even create branches, and push it all at once. But this is where it falls apart:
+** the wiki is *not* wysiwyg (far from it), and since github uses its own processing pipeline (which to my knowledge is not available as a local command line), there is no way to actually see what you get until you push it live (how would you see a branch for example ?)
+** github seems to be using different pipelines depending on where you are on the website (for example the rendering of a <code>gist</code> is different from the exact same input in the wiki given a file with the same extension!)</div>
+* it is hard to control the rendering of a wiki (wiki is usually rendered inside a _shell_ and you cannot control too much the layout or add your own javascript)
+* I needed to _inject_ some information in the wiki (like the latest changes, or the version number)
+* you cannot _bundle_ the documentation with the product
+
+h2. Choosing a different solution
+
+I settled for using a markup based solution like what I have done for <a href="{{ site.url }}/misc/2011/03/02/migrating-jroller-401-to-jekyll/">this blog</a>. The main reasons are:
+
+* it is easy to write
+* it can be checked in with the rest of the source code
+* it can have its own build process (treat the documentation as code!)
+
+Choosing a solution was not easy as there seems to be a lot of choices. "jekyll":http://jekyllrb.com/ was actually not a practical solution because it is really well suited for blogs, but not really for heavy documentation with cross references.
+
+I ended but choosing "sphinx":http://sphinx.pocoo.org/. _sphinx_ was originally created to write the "new python documentation":http://docs.python.org/. The _sphinx_ documentation is written with _sphinx_ and it is beautiful (as they mention it themselves) and very comprehensive. It has a lot of bells and whistles like:
+
+* changing the theme
+* generating different outputs (html, pdf, man pages, etc...)
+* setting up the project for you (<code>Makefile</code>, configuration file, directory structure, etc...)
+* generating a self contained web site
+* ...
+
+In the end I am really happy with the choice as it has been fairly easy to concentrate on the documentation itself rather than the tool. I am also very happy with the "final result":http://linkedin.github.com/glu/docs/latest/html/index.html: it is using the _agogo_ theme with some customizations (which are fairly easy to do).
+
+h2. Integrating sphinx in the build process
+
+glu uses "gradle":http://gradle.org/ for its build framework and in order to integrate the documentation generation as part of the build, I simply treated the documentation as another project in the source tree. You can check it out on "github":https://github.com/linkedin/glu/tree/master/docs/manual.
+
+_sphinx_ generates a <code>Makefile</code> as well as a configuration file (<code>conf.py</code>) for you. I simply had to create a _gradle_ task to do the following:
+
+# copy/inject the version (coming from the build)
+# copy the release notes in the sphinx directory structure
+# invoke the <code>Makefile</code>
+
+This is what it looks like (you can view the "full build file":https://github.com/linkedin/glu/blob/master/docs/manual/build.gradle)
+
+{% highlight java %}
+sphinxDir = new File(buildDir, "sphinx")
+htmlDocDir = new File(sphinxDir, "build/html")
+
+task doc << {
+  // copy/replace @version@
+  copy {
+    from("src/main/sphinx") {
+      filter(tokens: ["version": version], ReplaceTokens)
+    }
+    into sphinxDir
+    exclude "**/*.png"
+    exclude "**/*.gif"
+  }
+  // copy images (no replacement)
+  copy {
+    from("src/main/sphinx")
+    into sphinxDir
+    include "**/*.png"
+    include "**/*.gif"
+  }
+  // copy the release notes at the root of the tree
+  copy {
+    from new File(rootDir, "RELEASE.rst")
+    into new File(sphinxDir, "source")
+  }
+  // execute the makefile
+  ant.exec(executable: "make", dir: sphinxDir, failonerror: true) {
+    arg(line: "html")
+  }
+}
+{% endhighlight %}
+
+Finally, the documentation gets copied in the final product: in the end it is a static web site with a self contained set of html pages, css and images.
+
+<div class="info"><img src="{{ site.url }}/resource/info_48x48.png" alt="info_48x48.png" border="0" width="21" height="21" /> To generate the tables, I used the <code>table-capture</code> mode from emacs :)</div>
+
+h2. Conclusion
+
+Treating documentation as code has a lot of advantages:
+
+* it can be checked in with the rest of the source code thus sharing the same lifecycle, branching strategy, etc...
+* using a markup language (text based) allows for easy source control management of the documentation (you can do diffs, and whatever else you can on regular source code)
+* it can have its own build process allowing you to inject information from the build itself (in this case I am injecting only the build version, but it opens up the door to a lot more (like test results, etc...))
+* you can build any kind of automation around it
+
+<div class="info"><img src="{{ site.url }}/resource/info_48x48.png" alt="info_48x48.png" border="0" width="21" height="21" /> *Note about github*
+
+I may seem to be ranting about "github":http://www.github.com, but really I love what they have done. It is an amazing idea and if you are a software developer, you *should* have an account there! From my point of view, github is for developers what a portfolio is for artists!</div>
