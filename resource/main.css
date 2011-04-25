@@ -90,10 +90,10 @@ a.nav:hover {
   -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   width: 100%;
-  min-height: 6em;
+  min-height: 47px;
   background: {{ site.mainColor2 }};
   border-top: solid 1px {{ site.mainColor1 }};
-  padding: 1em 0 0 1em;
+  padding: 0;
 }
 
 /**************
@@ -358,24 +358,10 @@ div.twtr-doc {
 /**
  * logo */
 .page-footer .logo {
-  border: solid 5px white;
-  font-size: 3.5em;
+  padding: 5px 0 0 5px;
   display: inline-block;
-  -moz-border-radius-topleft: 20px;
-  -webkit-border-top-left-radius: 20px;
-  -moz-border-radius-bottomright: 20px;
-  -webkit-border-bottom-right-radius: 20px;
-  border-top-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-  color: white;
-  font-family: {{ site.monospaceFontFamily }};
   float: left;
 } 
-
-.page-footer .logo .bit {
-  text-shadow: 2px 2px 5px #000000;
-  color: #ffffff;
-}
 
 /**
  * categories */
@@ -383,7 +369,8 @@ div.twtr-doc {
   list-style: none;
   display: inline;
   float: right;
-  padding-right: 2em;
+  padding: 5px 2em 0 5px;
+  margin: 0;
 }
 
 .page-footer .site-categories li {
@@ -397,13 +384,4 @@ div.twtr-doc {
   font-size: 0.5em;
   padding-left: 1em;
   padding-right: 1em;
-}
-
-/**
- * Copyright */
-.page-footer .copyright {
-  text-align: right;
-  clear: both;
-  color: {{ site.titleFGColor }};
-  padding-right: 2em;
 }
