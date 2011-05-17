@@ -1,0 +1,47 @@
+---
+layout: post
+title: "java.io.File.deleteOnExit() is evil"
+category: java
+tags:
+ - leak
+ - glu
+---
+If you take a look at the javadoc for "<code>File.deleteOnExit()</code>":http://www.kiwidoc.com/java/l/p/java/j2se/1.6/p/java.io/c/File#deleteOnExit%28%29 it clearly states:
+
+bq. _Once deletion has been requested, it is not possible to cancel the request. This method should therefore be used with care._
+
+It is relatively easy to overlook this kind of statement. In my case it led to a slow memory leak that was reported in "glu":http://linkedin.github.com/glu/docs/latest/html/index.html. In the end, finding out the memory leak turned out to be relatively simple thanks to <code>jmap</code> and "YourKit":http://www.yourkit.com/ (although it seems to always be _simple_ after the fact :)).
+
+The piece of (groovy) code that was causing the issue was the following:
+
+{% highlight java %}
+  static String cat(location) throws IOException
+  {
+    File tempFile = File.createTempFile("GroovyIOUtils.cat", ".txt")
+
+    tempFile.deleteOnExit()
+
+    try
+    {
+      fetchContent(location, tempFile)
+      return tempFile.text
+    }
+    finally
+    {
+      tempFile.delete()
+    }
+  }
+{% endhighlight %}
+
+What the code does: it creates a temporary file, then _downloads_ the <code>location</code> (URL) in this temporary file and simply returns the content as a <code>String</code>. In order to be safe, I called <code>tempFile.deleteOnExit()</code>, but as you can see the file is deleted in the <code>finally</code>.
+
+Non intuitively (but to be fair as stated in the javadoc!), once deletion has been requested, there is no way to cancel it, *even if you delete the file!*
+
+The implementation of <code>java.io.File.deleteOnExit()</code> simply keeps a list of <code>String</code> representing all the files that need to be deleted when the VM exits. And this list grows and grows as the <code>cat</code> method is called (which in this specific scenario was every 15 seconds, so the leak took many weeks to manifest itself!).
+
+Looking back at the issue and this specific java call, I actually do not see a real use for it and I have decided to ban it from my code for several reasons as I actually think it is evil:
+
+# it gives you a *false* sense of security: "oh the VM will take care of it..." which is *not* true: if the VM does not terminate properly, for any particular reason (power outage, <code>kill -9</code>,...) then the files will simply *not* be deleted. If your code relies on the fact that those files should not be present on VM restart then one day you will have a nasty surprise.
+# calling this method will eventually lead to a memory leak (granted of course it is called repeatedly, even if the frequency is very slow!)
+
+In the end, dealing with files is hard. If you generate a lot of temporary files you need to delete them at some point or another or you will fill up the disk. It is not always easy to know when a temporary file is _safe_ to be deleted, especially if a method creates it and returns it. I think this is where <code>java.io.File.deleteOnExit()</code> totally fails: it gives you the impression that it implements GC for files but as I mentionned before there are a lot of shortcommings.
