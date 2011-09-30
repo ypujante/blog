@@ -42,4 +42,4 @@ Joke aside, kiwidoc would be a fairly interesting use case. Although very small 
 
 h2. Feedback
 
-In the end, the community is what makes glu both successful and interesting. I am soliciting feedback. Please leave some. Even if it is just a simple idea or comment, it doesn't matter. I would really like this process to be collaborative. I would love to be able to derive a roadmap and start implementing it.  
+In the end, the community is what makes glu both successful and interesting. I am soliciting feedback. Please leave some. Even if it is just a simple idea or comment, it doesn't matter. I would really like this process to be collaborative. I would love to be able to derive a roadmap and start implementing it.  Feel free to leave feedback on the "forum":http://glu.977617.n3.nabble.com/RFC-The-future-of-glu-glu-in-the-clouds-td3383234.html.
