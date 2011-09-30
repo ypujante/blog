@@ -1,0 +1,45 @@
+---
+layout: post
+title: "The future of glu - glu in the cloud"
+category: glu
+tags:
+ - cloud
+ - glu
+---
+I have started thinking of where I would like to see "glu":http://linkedin.github.com/glu/docs/latest/html/index.html go in the future (3 to 6 months timeframe). It seems to me that what makes the most sense for the evolution of glu is to embrace the cloud.
+
+h2. glu today...
+
+Today glu works really well (at least I assume :) when the glu environment is setup: machines are up and running with a glu agent on it, ZooKeeper is installed, the console is up and running. The "tutorial":http://linkedin.github.com/glu/docs/latest/html/tutorial.html that comes with glu has _streamlined_ this effort for a quick and easy demonstration when everything runs locally on the same machine. The "production setup":http://linkedin.github.com/glu/docs/latest/html/production-setup.html is a bit more involved and could also be made more _streamlined_ (there are several tickets tracking this like "#58":https://github.com/linkedin/glu/issues/58 and "#84":https://github.com/linkedin/glu/issues/84).
+
+In the end, glu is a deployment automation platform which allows you to automate the deployment of your applications and services on a set of nodes. The missing piece is that glu does not know how to provision itself. One of the challenge of course is that in order to provision glu, first you need a node. In many cases (and this is the case at LinkedIn), this step involves an actual human being who is going to rack a physical piece of hardware, then install the OS on it, etc...
+
+One of the key concept of glu is that it turned provisioning into an API. Since it is an API, you can programmatically call it (which means you can programmatically provision a node) and of course you can automate it.
+
+In my mind, one of the biggest gain that the _cloud_ is bringing, is the fact that you can now treat hardware as software: you now have an API that allows you to bring machines up and down. This is a big mind shift. The beauty of it is since it is an API you can automate it!
+
+h2. glu in the cloud
+
+At the heart of glu relies the "_model_":http://linkedin.github.com/glu/docs/latest/html/static-model.html#static-model which defines what applications (services) need to run where. The _where_ part is already pretty abstract but glu assumes that it is a node that is already _glu aware_.
+
+Can we remove this assumption? After all, provisioning your applications is simply a matter of calling some API, and in the cloud, provisioning glu is also simply a matter of calling some API (albeit a very different one).
+
+In this scenario we could envision that the _model_ defines nodes in a more abstract way, for example: <code>ec2:standard:XL/agent-1</code>, which essentially defines <code>agent-1</code> to be running on an extra large standard EC2 instance.
+
+The same way that glu computes a delta to provision your applications, it could also determine that the node <code>agent-1</code> does not exist and as a result, needs to be provisioned with glu, in which case it would use the EC2 apis to create a brand new VM and install what is necessary on the node for glu to run.
+
+h2. Mind map
+
+In order to bootstrap the process I have created a mind map to capture my first thoughts (you can click the image to view the full version).
+
+<a href="{{ site.url }}/resource/images/2011-09-30/mind-map.png" target="#" title="Click to enlarge"><img src="{{ site.url }}/resource/images/2011-09-30/mind-map.png" alt="Mind Map" border="0" width="100%" style=""/></a>
+
+h2. My dream
+
+Currently I deploy my personal website "kiwidoc":http://www.kiwidoc.com on rackspace. The process is manual (this was done prior to glu and I did not _port_ it). My dream is that I can use glu to deploy kiwidoc. And this is what I really want to be able to do: _rackspace is having technical difficulties today... not a problem let's switch to ec2 while it gets fixed_. Dreaming is good :)
+
+Joke aside, kiwidoc would be a fairly interesting use case. Although very small there are already a bunch of 'issues' that glu in the cloud would need to address. For example, kiwidoc is split amongst 2 machines (a _nginx_ frontend and a _tomcat_ backend). The frontend needs to talk to the backend and for that it needs to use the 'internal' IP so that it not counted as external traffic. Also kiwidoc uses data (which is *not* code), like the search (_Lucene_) index. What happens if the node hosting the backend (and hence the index) needs to be recreated?
+
+h2. Feedback
+
+In the end, the community is what makes glu both successful and interesting. I am soliciting feedback. Please leave some. Even if it is just a simple idea or comment, it doesn't matter. I would really like this process to be collaborative. I would love to be able to derive a roadmap and start implementing it.  
