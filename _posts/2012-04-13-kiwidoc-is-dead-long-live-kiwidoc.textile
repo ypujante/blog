@@ -1,0 +1,31 @@
+---
+layout: post
+title: "kiwidoc is dead... long live kiwidoc"
+category: pongasoft
+tags:
+ - javadoc
+ - kiwidoc
+---
+Back in August 2009, I "announced":{{ site.url }}/entry/pongasoft_presents_kiwidoc/ the launch of the kiwidoc service. It is with great sadness that I am today announcing the end of the service. But wait, there is more! kiwidoc is now open source!
+
+h2. The end of kiwidoc
+
+When I started my investigation for building the kiwidoc service, I ran into several websites that were out of date and seemed to be abandoned. I told myself that I would not let that happen to my website. Fast track 2.5 years later, and this is what the kiwidoc service looks like.
+
+There are many reasons for that, but it all boils down in the end to the fact that kiwidoc never got any *real* traction. The vast majority of users visiting the website happens to stumble here from a google search, and move along... 
+
+Don't get me wrong, I know in the end that I am responsible for the lack of interest, and it is definitely a catch 22: people are not interested because I don't make it interesting (no new features, no new libraries, no promotion, etc...), and it is hard to get motivated when there is no traction. My last attempt was the integration with "uservoice":http://www.uservoice.com (which I highly recommend by the way): in over a year, I got a grand total of 11 messages...
+
+Quite a few things have changed in my life and I am also actively involved in other projects including the "glu deployment automation platform":http://www.github.com/linkedin/glu. So I have decided to move along and shut down the service.
+
+h2. kiwidoc as open source
+
+kiwidoc has been a tremendous learning experience for me and I have absolutely no regrets. I still believe that kiwidoc is an incredibly valuable tool for java developers and I will continue using it (I am running my own private instance ;).
+
+This is why, although the service is no longer running, I have decided to open source the code so that anybody can run their own copy of it. Or who knows, maybe somebody will want to improve on it! I will definitely try to provide help and feedback!
+
+You can check the "main website":http://www.pongasoft.com/kiwidoc or directly the "github":http://www.github.com/pongasoft/kiwidoc project.
+
+h2. A few thanks
+
+I wanted to thank all the people that have been using the web site on a regular basis and I apologize for the inconvenience related to the shutting down of the service. Thanks to Jason Z. for the kind words regarding the site closure, I hope you can run your own copy :).

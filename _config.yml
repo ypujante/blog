@@ -1,5 +1,5 @@
 # jekyll related entries
-pygments: true
+pygments: false
 url: http://www.pongasoft.com/blog/yan
 permalink: pretty
 category_title_prefix: ''
@@ -18,7 +18,7 @@ dateBackgroundColor: '#888888'
 
 # post related entries
 withLinkedIn: true
-withTweeter: true
+withGooglePlus: true
 withComments: true
 withGoogle: true
-prodMode: true
+prodMode: false

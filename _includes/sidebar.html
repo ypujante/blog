@@ -3,44 +3,20 @@
   <dd>My name is Yan
     Pujante {% if site.withLinkedIn and site.prodMode %}<script type="IN/MemberProfile" data-id="http://www.linkedin.com/in/pujante" data-format="hover"></script>{% endif %}. I am a software engineer and the author of the open source project
     <a href="http://www.github.com/linkedin/glu">glu</a>, the deployment automation platform. I am
-    also the creator of the <a href="http://www.kiwidoc.com">kiwidoc</a> service which allows you to
+    also the creator of the <a href="http://www.pongasoft.com/kiwidoc">kiwidoc</a> service which allows you to
     search and browse javadoc api.
     If you want more information about me please check my
     <a href="http://www.linkedin.com/in/yan">LinkedIn profile</a>.
   </dd>
 </dl>
-{% if site.withTweeter and site.prodMode %}
+{% if site.withGooglePlus and site.prodMode %}
 <dl class="entry">
-<script type="text/javascript">
-  new TWTR.Widget({
-                    version: 2,
-                    type: 'profile',
-                    rpp: 4,
-                    interval: 6000,
-                    width: 'auto',
-                    height: 300,
-                    theme: {
-                      shell: {
-                        background: '{{ site.titleBGColor }}',
-                        color: '{{ site.titleFGColor }}'
-                      },
-                      tweets: {
-                        background: '{{ site.contentBGColor }}',
-                        color: '{{ site.contentFGColor }}',
-                        links: '{{ site.mainColor1 }}'
-                      }
-                    },
-                    features: {
-                      scrollbar: false,
-                      loop: false,
-                      live: false,
-                      hashtags: true,
-                      timestamp: true,
-                      avatars: true,
-                      behavior: 'all'
-                    }
-                  }).render().setUser('yanpujante').start();
-</script>
+  <dt>Social</dt>
+  <dd>
+    <div id="googleplus">
+      <g:plus href="https://plus.google.com/114615490485088873300" rel="publisher" width="175" height="69" theme="light"></g:plus>
+    </div>
+  </dd>
 </dl>
 {% endif %}
 {% if site.prodMode %}
@@ -54,7 +30,7 @@
   <dt>Links</dt>
   <dd>
     <ul>
-      <li><a href="http://www.kiwidoc.com" title="kiwidoc">kiwidoc</a></li>
+      <li><a href="http://www.pongasoft.com/kiwidoc" title="kiwidoc">kiwidoc</a></li>
       <li><a href="http://linkedin.github.com/glu/docs/latest/html/index.html" title="glu">glu</a></li>
       <li><a href="http://www.pongasoft.com" title="pongasoft main web site">pongasoft</a></li>
       <li><a href="http://blog.linkedin.com/?s=osgi" title="My OSGi posts on the LinkedIn blog">OSGi
