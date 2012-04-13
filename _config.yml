@@ -1,5 +1,5 @@
 # jekyll related entries
-pygments: false
+pygments: true
 url: http://www.pongasoft.com/blog/yan
 permalink: pretty
 category_title_prefix: ''
@@ -21,4 +21,4 @@ withLinkedIn: true
 withGooglePlus: true
 withComments: true
 withGoogle: true
-prodMode: false
+prodMode: true
