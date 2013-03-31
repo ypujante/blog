@@ -1,0 +1,110 @@
+---
+layout: post
+title: "How to fix IncompatibleClassChangerError with groovy on jdk7"
+category: java
+tags:
+ - groovy
+ - jdk6
+ - jdk7
+ - exceptions
+---
+While working on having the latest version of "glu":http://linkedin.github.com/glu/docs/latest/html/index.html compile with jdk1.6 and run with either jdk1.6 or jdk1.7 I ran into the following error raised by groovy:
+
+{% highlight text %}
+Caused by: java.lang.IncompatibleClassChangeError: the number of constructors 
+during runtime and compile time for java.lang.RuntimeException do not match. 
+Expected 4 but got 5 
+{% endhighlight %}
+
+h2. The issue
+
+The issue gets triggered when running any groovy code compiled with jdk1.6 and running with jdk1.7 whenever you are throwing an exception that has been written in groovy (meaning your exception is defined in a <code>.groovy</code> file).
+
+h2. The source of the problem
+
+This exception is triggered by the following section in the "groovy source code":https://github.com/groovy/groovy-core/blob/GROOVY_2_0_7/src/main/groovy/lang/MetaClassImpl.java#L1405
+
+{% highlight groovy %}
+public int selectConstructorAndTransformArguments(int numberOfConstructors, Object[] arguments) {
+  //TODO: that is just a quick prototype, not the real thing!
+  if (numberOfConstructors != constructors.size()) {
+      throw new IncompatibleClassChangeError("the number of constructors during runtime and compile time for " +
+              this.theClass.getName() + " do not match. Expected " + numberOfConstructors + " but got " + constructors.size());
+  }
+  // ... clipped remainder of the method...
+}
+{% endhighlight %}
+
+This is pretty frustrating as the comment seems to indicate that this was added as a quick prototype. Also the <code>numberOfConstructors</code> variable is not used in the remainder of the method!
+
+In java 1.7, there is one more constructor that has been added to the <code>java.lang.Exception</code> class (a first in many years!). So at runtime, the previous code simply fails and throws <code>IncompatibleClassChangeError</code>.
+
+h2. The solution(s)
+
+h3. Compile and run under jdk1.7
+
+If you don't need the backward compatibility, you can always (re)compile your code with jdk1.7 and run with jdk1.7. 
+
+The problem here is that if you use any groovy library compiled with jdk1.6 (or earlier), then you will have the same problem.
+
+h3. Changing your groovy exceptions into java exceptions
+
+Doing a quick search on the Internet, I realized I was not the only one and found this "solution":http://blog.proxerd.pl/article/how-to-fix-incompatibleclasschangeerror-for-your-groovy-projects-running-on-jdk7.
+
+This solution does indeed work and if you can change all your exceptions that were groovy exceptions into java exceptions then the problem does go away.
+
+The problem is that in my case, it was a lot of changes in several different projects.
+
+Also you have the same issue as in the previous section: if you use any groovy library compiled with jdk1.6 (or earlier), then you will have the same problem.
+
+h3. Removing the "extra" constructor at runtime
+
+I came up with a different approach which _simply_ removes the extra constructor added by jdk1.7 at runtime. The reasoning behind this is, since I am compiling with jdk1.6 there is no way I can use this extra constructor in my code since it did not exist!
+
+So here is what I did:
+
+{% highlight groovy %}
+static void installWorkaround()
+{
+  if(getJavaVersionAsDouble() >= 1.7)
+  {
+    def metaClass = Exception.metaClass
+
+    if(metaClass instanceof HandleMetaClass)
+      metaClass = metaClass.replaceDelegate()
+
+    def field = MetaClassImpl.class.getDeclaredField('constructors')
+    field.setAccessible(true)
+    def constructors = field.get(metaClass)
+
+    int jdk7ConstructorIdx = -1
+
+    constructors.array.eachWithIndex { elt, idx ->
+      if(elt.cachedConstructor.parameterTypes.size() == 4)
+        jdk7ConstructorIdx = idx
+    }
+
+    if(jdk7ConstructorIdx != -1)
+    {
+      constructors.remove(jdk7ConstructorIdx)
+      log.info "Running with jdk1.7: installed groovy Exception workaround"
+    }
+  }
+  else
+  {
+    log.debug "Running with jdk1.6: non workaround necessary"
+  }
+}
+{% endhighlight %}
+
+This code modifies the metaclass of the <code>java.lang.Exception</code> class to remove the constructor added by jdk1.7. Note that this code is pretty safe to call many times but is recommended to be called as early as possible when you start your groovy application.
+
+From my own testing this works very well and the original <code>IncompatibleClassChangeError</code> is no longer thrown. I have asked for feedback on the "groovy forum":http://groovy.329449.n5.nabble.com/jdk7-and-IncompatibleClassChangeError-for-exception-class-td5714582.html in regards to this solution but have not received any as of this writing.
+
+Note that I am using groovy version 2.0.7 (and this problem remains on the (groovy) trunk as of this writing). I have not tried this solution with any other version of groovy.
+
+h2. Reference
+
+* <a href="#" onclick="toggleShowHide('gist-5281627-ExceptionJdk17Workaround');return false;"><code>ExceptionJdk17Workaround</code> full source code</a> from github.
+<div id="gist-5281627-ExceptionJdk17Workaround" class="hidden"><script src="https://gist.github.com/ypujante/5281627.js"></script></div>
+
