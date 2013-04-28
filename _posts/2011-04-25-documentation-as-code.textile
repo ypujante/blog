@@ -12,7 +12,7 @@ tags:
 ---
 h2. Introduction
 
-About a month ago, I embarked on a complete rewrite of the glu documentation (here is the "result":http://linkedin.github.com/glu/docs/latest/html/index.html). The first iteration of the documentation was created using the wiki hosted on github, alongside the "source code":https://github.com/linkedin/glu.
+About a month ago, I embarked on a complete rewrite of the glu documentation (here is the "result":http://linkedin.github.com/glu/docs/latest/html/index.html). The first iteration of the documentation was created using the wiki hosted on github, alongside the "source code":https://github.com/pongasoft/glu.
 
 I was not very happy with this solution for several reasons:
 
@@ -46,7 +46,7 @@ In the end I am really happy with the choice as it has been fairly easy to conce
 
 h2. Integrating sphinx in the build process
 
-glu uses "gradle":http://gradle.org/ for its build framework and in order to integrate the documentation generation as part of the build, I simply treated the documentation as another project in the source tree. You can check it out on "github":https://github.com/linkedin/glu/tree/master/docs/manual.
+glu uses "gradle":http://gradle.org/ for its build framework and in order to integrate the documentation generation as part of the build, I simply treated the documentation as another project in the source tree. You can check it out on "github":https://github.com/pongasoft/glu/tree/master/docs/manual.
 
 _sphinx_ generates a <code>Makefile</code> as well as a configuration file (<code>conf.py</code>) for you. I simply had to create a _gradle_ task to do the following:
 
@@ -54,7 +54,7 @@ _sphinx_ generates a <code>Makefile</code> as well as a configuration file (<cod
 # copy the release notes in the sphinx directory structure
 # invoke the <code>Makefile</code>
 
-This is what it looks like (you can view the "full build file":https://github.com/linkedin/glu/blob/master/docs/manual/build.gradle)
+This is what it looks like (you can view the "full build file":https://github.com/pongasoft/glu/blob/master/docs/manual/build.gradle)
 
 {% highlight java %}
 sphinxDir = new File(buildDir, "sphinx")

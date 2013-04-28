@@ -11,11 +11,11 @@ tags:
 ---
 h3. Introduction
 
-"glu":https://www.github.com/linkedin/glu is a deployment automation platform which allows you to easily and efficiently deploy applications on many hosts. In the glu model, there is an active agent (aka, the glu agent) running on each host. Since this agent is always up and running on the host, it can be used to monitor the host itself and/or the applications running on it. By using the _timers_ feature of the agent and ZooKeeper, it is possible to build a very solid monitoring solution by reusing the infrastructure already in place for glu.
+"glu":https://www.github.com/pongasoft/glu is a deployment automation platform which allows you to easily and efficiently deploy applications on many hosts. In the glu model, there is an active agent (aka, the glu agent) running on each host. Since this agent is always up and running on the host, it can be used to monitor the host itself and/or the applications running on it. By using the _timers_ feature of the agent and ZooKeeper, it is possible to build a very solid monitoring solution by reusing the infrastructure already in place for glu.
 
 h3. glu agent _timers_
 
-The _timers_ feature of the glu agent allows you to schedule a timer, defined by a piece of code (a closure), which is executed at regular intervals. The agent manages timers appropriately, taking care of running them for you and restarting them in the event that the agent restarts. The full api of the timers feature can be found on "github":https://github.com/linkedin/glu/blob/master/agent/org.linkedin.glu.agent-api/src/main/groovy/org/linkedin/glu/agent/api/Timers.groovy. Here is how you schedule and cancel a timer in a glu script:
+The _timers_ feature of the glu agent allows you to schedule a timer, defined by a piece of code (a closure), which is executed at regular intervals. The agent manages timers appropriately, taking care of running them for you and restarting them in the event that the agent restarts. The full api of the timers feature can be found on "github":https://github.com/pongasoft/glu/blob/master/agent/org.linkedin.glu.agent-api/src/main/groovy/org/linkedin/glu/agent/api/Timers.groovy. Here is how you schedule and cancel a timer in a glu script:
 
 {% highlight java %}
 class MonitorScript
@@ -58,7 +58,7 @@ Here is the result of running this script: every 5 seconds, a message containing
 
 h3. Detecting and reporting errors from within the script
 
-We can add logic to the script to change the state based on the result of the command (using the "stateManager":https://github.com/linkedin/glu/blob/master/agent/org.linkedin.glu.agent-api/src/main/groovy/org/linkedin/glu/agent/api/StateManager.groovy). The state will automatically be reported in ZooKeeper and propagated to the console.
+We can add logic to the script to change the state based on the result of the command (using the "stateManager":https://github.com/pongasoft/glu/blob/master/agent/org.linkedin.glu.agent-api/src/main/groovy/org/linkedin/glu/agent/api/StateManager.groovy). The state will automatically be reported in ZooKeeper and propagated to the console.
 
 {% highlight java %}
 class MonitorScript
@@ -149,7 +149,7 @@ In this screenshot, everything below 'View Details' is coming directly from ZooK
 
 h3. Collecting and processing the monitoring data
 
-As we have seen the data makes it in ZooKeeper. The fact that you can view it in the console is nice, but if you want to process the data, you can write an external program that will connect directly to ZooKeeper. You can reuse the convenient class that the console uses: "AgentsTracker":https://github.com/linkedin/glu/blob/master/agent/org.linkedin.glu.agent-tracker/src/main/groovy/org/linkedin/glu/agent/tracker/AgentsTracker.groovy and register a set of listeners to be notified when things change.
+As we have seen the data makes it in ZooKeeper. The fact that you can view it in the console is nice, but if you want to process the data, you can write an external program that will connect directly to ZooKeeper. You can reuse the convenient class that the console uses: "AgentsTracker":https://github.com/pongasoft/glu/blob/master/agent/org.linkedin.glu.agent-tracker/src/main/groovy/org/linkedin/glu/agent/tracker/AgentsTracker.groovy and register a set of listeners to be notified when things change.
 
 {% highlight java linenos %}
 public class MonitorMain
@@ -251,8 +251,8 @@ In a real monitoring solution, you probably will want to do a lot more than capt
 
 h3. References
 
-* For more information about glu, check the "wiki":https://github.com/linkedin/glu/wiki. 
-* You can download glu including the tutorial from the "download page":https://github.com/linkedin/glu/downloads.
+* For more information about glu, check the "documentation":http://pongasoft.github.io/glu/docs/latest/html/index.html. 
+* You can download glu including the tutorial from the "download page":https://bintray.com/pkg/show/general/pongasoft/glu/releases/.
 * <a href="#" onclick="toggleShowHide('gist-877590-MonitorScript');return false;"><code>MonitorScript</code> source code</a> from github.
 <div id="gist-877590-MonitorScript" class="hidden"><script src="https://gist.github.com/877590.js?file=MonitorScript.groovy"></script></div>
 * <a href="#" onclick="toggleShowHide('gist-877590-MonitorMain');return false;"><code>MonitorMain</code> source code</a> from github.

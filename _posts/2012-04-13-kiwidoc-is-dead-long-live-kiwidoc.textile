@@ -16,7 +16,7 @@ There are many reasons for that, but it all boils down in the end to the fact th
 
 Don't get me wrong, I know in the end that I am responsible for the lack of interest, and it is definitely a catch 22: people are not interested because I don't make it interesting (no new features, no new libraries, no promotion, etc...), and it is hard to get motivated when there is no traction. My last attempt was the integration with "uservoice":http://www.uservoice.com (which I highly recommend by the way): in over a year, I got a grand total of 11 messages...
 
-Quite a few things have changed in my life and I am also actively involved in other projects including the "glu deployment automation platform":http://www.github.com/linkedin/glu. So I have decided to move along and shut down the service.
+Quite a few things have changed in my life and I am also actively involved in other projects including the "glu deployment automation platform":http://www.github.com/pongasoft/glu. So I have decided to move along and shut down the service.
 
 h2. kiwidoc as open source
 

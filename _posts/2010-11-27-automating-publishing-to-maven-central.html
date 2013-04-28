@@ -24,7 +24,7 @@ uploadArchives {
       pomToConfigure.project {
         name project.name
         description "A useful set of gradle plugins"
-        url "http://github.com/linkedin/gradle-plugins"
+        url "http://github.com/pongasoft/gradle-plugins"
         licenses {
           license {
             name "The Apache Software License, Version 2.0"
@@ -84,7 +84,7 @@ You then need to login to <a href="https://oss.sonatype.org/index.html#welcome">
 
 I guess it is not fully automated as you still need to manually close/release the staging repository but the painful part (the part about uploading the artifacts to staging) is fully automated thanks to gradle and the script.
 
-You can use the <a href="https://github.com/linkedin/gradle-plugins">gradle plugins</a> that I open sourced to help with the release: the <code>org.linkedin.repository</code> and <code>org.linkedin.release</code> plugin can simplify your build code (for example the plugin takes care of the javadoc and sources requirements).
+You can use the <a href="https://github.com/pongasoft/gradle-plugins">gradle plugins</a> that I open sourced to help with the release: the <code>org.linkedin.repository</code> and <code>org.linkedin.release</code> plugin can simplify your build code (for example the plugin takes care of the javadoc and sources requirements).
 
 Note that this script can be used totally independently of gradle and you do not need to use gradle to use it!
 
