@@ -16,6 +16,9 @@ during runtime and compile time for java.lang.RuntimeException do not match.
 Expected 4 but got 5 
 {% endhighlight %}
 
+<div class="info"><img src="{{ site.url }}/resource/info_48x48.png" alt="info_48x48.png" border="0" width="21" height="21" />The code in this blog has been updated on 2013/05/13 to include a fix for the fact that the workaround would not _stick_ due to weak references.</div>
+
+
 h2. The issue
 
 The issue gets triggered when running any groovy code compiled with jdk1.6 and running with jdk1.7 whenever you are throwing an exception that has been written in groovy (meaning your exception is defined in a <code>.groovy</code> file).
@@ -70,25 +73,37 @@ static void installWorkaround()
   {
     def metaClass = Exception.metaClass
 
-    if(metaClass instanceof HandleMetaClass)
-      metaClass = metaClass.replaceDelegate()
+      if(metaClass.hasProperty("__gluExceptionJdk17Workaround"))
+      {
+        log.info "Running with jdk1.7: groovy Exception workaround already installed"
+      }
+      else
+      {
+        def field = MetaClassImpl.class.getDeclaredField('constructors')
+        field.setAccessible(true)
+        def constructors = field.get(metaClass)
 
-    def field = MetaClassImpl.class.getDeclaredField('constructors')
-    field.setAccessible(true)
-    def constructors = field.get(metaClass)
+        int jdk7ConstructorIdx = -1
 
-    int jdk7ConstructorIdx = -1
+        constructors.array.eachWithIndex { elt, idx ->
+          if(elt.cachedConstructor.parameterTypes.size() == 4)
+            jdk7ConstructorIdx = idx
+        }
 
-    constructors.array.eachWithIndex { elt, idx ->
-      if(elt.cachedConstructor.parameterTypes.size() == 4)
-        jdk7ConstructorIdx = idx
-    }
+        if(jdk7ConstructorIdx != -1)
+        {
+          constructors.remove(jdk7ConstructorIdx)
+          // this has 2 purposes:
+          // 1) allowing to check the workaround
+          // 2) making sure that the metaclass is no longer a weak reference, hence is not garbage collected!
+          metaClass.__gluExceptionJdk17Workaround = true
+          log.info "Running with jdk1.7: installed groovy Exception workaround"
+        }
+      }
 
-    if(jdk7ConstructorIdx != -1)
-    {
-      constructors.remove(jdk7ConstructorIdx)
-      log.info "Running with jdk1.7: installed groovy Exception workaround"
-    }
+      // making sure the workaround is in place...
+      if(!new Exception().__gluExceptionJdk17Workaround)
+        throw new RuntimeException("groovy exception workaround not set properly!!!")
   }
   else
   {
