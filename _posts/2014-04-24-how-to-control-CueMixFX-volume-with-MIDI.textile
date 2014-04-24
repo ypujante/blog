@@ -1,0 +1,59 @@
+---
+layout: post
+title: "How to control CueMix FX volume with MIDI"
+category: music
+tags:
+ - osc
+ - MIDI
+---
+I have a MOTU 828mk3 hardware interface hooked up to my computer sitting in a rack a few feet away from me. Controlling the volume knob is not very practical because of its location (and size... I wished MOTU would design a bigger volume button!). I also have several MIDI controllers connected to my computer and I wanted to use one of those to control the volume. The issue is that out of the box, MOTU only supports a very small set of MIDI controllers (all Mackie branded). I was still able to make it work using "OSC":http://en.wikipedia.org/wiki/Open_Sound_Control and here is how I did it.
+
+h2. The final setup
+
+Let's start with the final big picture:
+
+<img src="{{ site.url }}/resource/images/2014-04-24/final-setup.png" alt="final setup" border="0" width="100%" style=""/>
+
+The various pieces:
+
+* my hardware MIDI controller is a Maschine MKII and I use the big knob in the master section (including push for mute!)
+* the computer runs "OSCulator":http://www.osculator.net/ which is the glue that converts from MIDI to OSC and vice-versa
+* the computer also runs CueMix FX which is the software that comes with the MOTU hardware interface (unfortunately this software must be running as well in order for the system to work) 
+* my hardware interface is a MOTU 828mk3 
+
+<div class="warning"><img src="{{ site.url }}/resource/warning_48x48.png" alt="warning" border="0" width="21" height="21" />I would strongly suggest you experiment without any sound being played by your interface. Making mistakes in the setup could result in the volume jumping to max which is probable not very good for your speakers or ears...</div>
+
+h2. Starting with OSCulator
+
+After you install OSCulator, simply turn the knob/fader on you hardware MIDI controller and it will automatically show up in the OSCulator interface. In the case of the Maschine controller I ended up with the following 2 MIDI messages:
+
+* <code>/midi/cc101/1</code>: which is the MIDI message sent when I turn the knob => this will control the volume
+* <code>/midi/cc102/1</code>: which is the MIDI message sent when I push the knob => this will control mute/unmute
+
+h2. Setting up CueMix FX
+
+In CueMix FX, select the menu *Control Surfaces/Configure OSC Devices*. Then click the little <code>+</code> icon and in the *Endpoint:* section select the OSCulator entry (make sure to **not** select the MOTU endpoint otherwise you create a loop). In the *Layout Specification*, there should be an entry already pre-populated (*TouchOSC-iPad*). If not you can simply click *Add* and load the file that you can get from the "MOTU website":http://www.motu.com/download/download_matching_downloads.html?download_id=221 .
+
+h2. Setting up the wiring
+
+Now the only thing that needs to be done is configure OSCulator to translate the MIDI messages into OSC messages and vice versa. The OSC message that you are interested in is <code>/dev/0/0/mon</code> which controls the monitor level. This is what my configuration looks like:
+
+h3. OSCulator routing parameters
+
+<img src="{{ site.url }}/resource/images/2014-04-24/OSC-routing-parameters.png" alt="parameters" border="0" width="100%" style=""/>
+
+* the first rewrite address is used when the MIDI controller sends a value (note that OSCulator automatically converts the 0-127 MIDI value to 0.0-1.0 float value required for OSC): it is sent as the first parameter of the OSC <code>/dev/0/0/mon</code> message
+* the second rewrite address sends the (float) value 0 (which turns down the volume to 0) and is used for mute
+* the third rewrite address sends the content of variable 0 (which restores the volume to its prior level) and is used for mute
+
+h3. OSCulator routing
+
+<img src="{{ site.url }}/resource/images/2014-04-24/OSCulator-routing.png" alt="routing" border="0" width="100%" style=""/>
+
+* The first entry shows that on receiving the message <code>/dev/0/0/mon</code> (which is a message sent by the MOTU interface if you tweak the knob directly on the hardware interface or in the CueMix FX application!), then the message is passed along to the MIDI controller (MIDI event CC 101) as well as stored in <code>variable(0)</code> (to implement mute). Note that the advantage of the knob I selected on the Maschine controller is that it is an infinitely turning knob so its value can be changed easily.
+* The second entry shows that on receiving the message <code>/midi/cc101/1</code> (which happens when the knob on the MIDI controller is turned), then an OSC message is routed to CueMIX FX as well as stored in <code>variable(0)</code> (to implement mute).
+* The last entry shows that on receiving the message <code>/midi/cc102/1</code> (which happens when the knob on the MIDI controller is pushed), an OSC message is routed to CueMIX FX with a value 0.0 or <code>variable(0)</code> depending on the input value (hi/lo). This achieves mute.
+
+h2. Conclusion
+
+I have achieved what I wanted to do in the first place. I wished I did not have to run 2 pieces of software in order to do this. During my experiment I have noticed that if the CueMix FX interface is not visible for a while, then it stops responding to OSC messages. Bringing it back visible instantly fixes the issue. I am still investigating what the problem could be.
