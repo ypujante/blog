@@ -21,7 +21,7 @@ The various pieces:
 * the computer also runs CueMix FX which is the software that comes with the MOTU hardware interface (unfortunately this software must be running as well in order for the system to work) 
 * my hardware interface is a MOTU 828mk3 
 
-<div class="warning"><img src="{{ site.url }}/resource/warning_48x48.png" alt="warning" border="0" width="21" height="21" />I would strongly suggest you experiment without any sound being played by your interface. Making mistakes in the setup could result in the volume jumping to max which is probable not very good for your speakers or ears...</div>
+<div class="warning"><img src="{{ site.url }}/resource/warning_48x48.png" alt="warning" border="0" width="21" height="21" />I would strongly suggest you experiment without any sound being played by your interface. Making mistakes in the setup could result in the volume jumping to max which is probably not very good for your speakers or ears...</div>
 
 h2. Starting with OSCulator
 
