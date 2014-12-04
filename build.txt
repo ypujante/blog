@@ -1,9 +1,5 @@
 Building the blog and starting a server:
-jekyll --server --url http://localhost:4000
-
-Building the blog only (somehow starting the server takes forever)
-jekyll --url http://localhost:4000
+jekyll serve --config _config.yml,_config-dev.yml
 
 Building for deployment:
-jekyll
-
+jekyll build
