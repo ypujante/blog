@@ -1,6 +1,6 @@
 # jekyll related entries
 highlighter: pygments
-url: http://www.pongasoft.com/blog/yan
+url: https://www.pongasoft.com/blog/yan
 permalink: pretty
 category_title_prefix: ''
 exclude: ['jkdev.sh', 'brokenbits-blog.iml']
@@ -15,6 +15,10 @@ titleFGColor: 'white'
 contentFontFamily: 'Helvetica,Arial,sans-serif'
 monospaceFontFamily: 'Courier New,monospace'
 dateBackgroundColor: '#888888'
+
+# since jekyll 3.0...
+gems:
+- jekyll-textile-converter
 
 # post related entries
 withLinkedIn: true

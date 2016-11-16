@@ -1,2 +1,2 @@
 #!/bin/sh
-jekyll serve -H localhost -P 4000 $@
+jekyll serve --config "_config.yml,_config-dev.yml" $@
