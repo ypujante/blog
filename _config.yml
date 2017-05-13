@@ -23,6 +23,6 @@ gems:
 # post related entries
 withLinkedIn: true
 withTwitter: true
-withComments: true
+withComments: false
 withGoogle: true
 prodMode: true

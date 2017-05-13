@@ -43,7 +43,7 @@
                    title="View posts in category {{ category }}">{{ category }}</a></li>
             {% endfor %}
           </ul>
-          | <a href="{{site.url}}{{ post.url }}#disqus_thread" data-disqus-identifier="{{ post.id }}"></a>
+          {% if site.withComments %} | <a href="{{site.url}}{{ post.url }}#disqus_thread" data-disqus-identifier="{{ post.id }}"></a> {% endif %}
         </div>
       </div>
       <div class="post-content">
@@ -78,7 +78,7 @@
     {% endif %}
     <div class="post-footer">
       <div class="post-footer-content">
-      &copy; 2009-2016 Yan Pujante under a <a class="nav-cc" href="https://creativecommons.org/licenses/by/3.0/">Commons Creative license</a>.
+      &copy; 2009-2017 Yan Pujante under a <a class="nav-cc" href="https://creativecommons.org/licenses/by/3.0/">Commons Creative license</a>.
       </div>
     </div>
   </div>
