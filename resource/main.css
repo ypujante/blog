@@ -6,7 +6,7 @@
 
 html {
   background: -webkit-gradient(linear,0 100%,0 0,color-stop(.4,{{ site.mainColor1 }}),color-stop(1,{{ site.mainColor2 }})) fixed no-repeat 0 100%;
-  background: -moz-linear-gradient(bottom,{{ site.mainColor1 }} 40%,{{ site.mainColor2 }}) fixed no-repeat 0 100%;
+  background: -moz-linear-gradient(bottom,{{ site.mainColor2 }} 40%,{{ site.mainColor1 }}) fixed no-repeat 0 100%;
   background-color: {{ site.mainColor2 }};
   min-width: 800px;
   font-family: {{ site.contentFontFamily }}
@@ -29,7 +29,6 @@ a:hover {
 
 a.nav {
    font-weight: bold;
-   letter-spacing: -0.1em;
    text-shadow: 1px 1px 0 #000000;
  }
 
@@ -57,43 +56,39 @@ a.nav:hover {
 /***********************************
  * 2 column layout + fixed footer
  ***********************************/
-.post {
+.page {
+  display: grid;
   margin: 1em;
+  grid-gap: 1em 1em;
+  grid-template-columns: 30% 70%;
+  grid-template-rows: auto;
+  grid-template-areas:
+    "header header"
+    "sidebar post";
 }
 
-.post-spacer {
-  clear: both;
-  margin-bottom: 12em; /* accounting for fixed footer */
+.sidebar {
+  grid-area: sidebar;
 }
 
-.col1 {
-  float: left;
-  width: 30%;
+.post {
+  grid-area: post;
 }
 
-.col2 {
-  float: right;
-  width: 70%;
+.header {
+  grid-area: header;
 }
 
-.col1-content {
-  margin: 0 2em 0 0;
-}
-
-.page-footer {
-  bottom: 0;
-  left: 0;
-  position: fixed;
-  right: 0;
-  z-index: 100;
+.header {
   -moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-  width: 100%;
-  min-height: 47px;
   background: {{ site.mainColor2 }};
-  border-top: solid 1px {{ site.mainColor1 }};
+  border: solid 1px {{ site.mainColor1 }};
   padding: 0;
+
+  display: grid;
+  grid-template-columns: auto auto;
 }
 
 /**************
@@ -131,9 +126,8 @@ a.nav:hover {
 
 /**
  * post title */
-.col2 .post-title {
+.post-title {
    font-family: {{ site.monospaceFontFamily }};
-   letter-spacing: -0.1em;
    font-size: 1.5em;
    font-weight: bold;
    background: {{ site.titleBGColor }};
@@ -203,7 +197,7 @@ a.nav:hover {
 
  /**
   * post content */
-.col2 .post-content {
+.post-content {
   border: solid 1px white;
   border-bottom: groove 1px white;
   padding: 1.5em;
@@ -214,13 +208,13 @@ a.nav:hover {
   overflow: auto;
 }
 
-.col2 .post-title-content-footer {
+.post-title-content-footer {
   -moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
 
-.col2 .post-content pre {
+.post-content pre {
   overflow-x: auto;
   border: solid 1px #bbbbbb;
   -moz-box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
@@ -246,13 +240,13 @@ a.nav:hover {
 
 /**
  * Post by categories */
-.col2 table.posts-by-category {
+table.posts-by-category {
   border-collapse: collapse;
   width: 100%;
   margin-top: 1em;
 }
 
-.col2 table.posts-by-category td {
+table.posts-by-category td {
   white-space: nowrap;
   border-bottom: dotted 1px #aaaaaa;
   padding-right: 0.5em;
@@ -278,10 +272,6 @@ a.nav:hover {
 .post-footer-content {
   font-size: 0.8em;
 }
-
-a.nav-cc {
-   letter-spacing: -0.1em;
- }
 
 a.nav-cc:visited {
    color: {{ site.contentFGColor }};
@@ -338,35 +328,94 @@ a.nav-cc:hover {
 }
 
 /***************
- * page footer
+ * page header
  ****************/
 /**
  * logo */
-.page-footer .logo {
-  padding: 5px 0 0 5px;
-  display: inline-block;
-  float: left;
-} 
+.header .logo {
+  margin: 0.1em;
+  padding: 0 5px 0 5px;
+  border: solid 3px white;
+  border-top-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  font-family: {{site.monospaceFontFamily}};
+  font-size: 30px;
+  color: white;
+  justify-self: start;
+}
+
+.header .logo .highlight {
+  text-shadow: 2px 2px 2px black;
+}
 
 /**
  * categories */
-.page-footer ul.site-categories {
-  list-style: none;
-  display: inline;
-  float: right;
-  padding: 5px 2em 0 5px;
-  margin: 0;
+.header .categories {
+  justify-self: right;
+  align-self: end;
 }
 
-.page-footer .site-categories li {
-  display: inline;
-  font-family: {{ site.monospaceFontFamily }};
-  font-size: 1.1em;
+.header .categories {
+  position: relative;
+  display: inline-block;
 }
 
-.page-footer .site-categories li .separator {
+.header .dropbtn {
+  color: white;
+  background-color: {{ site.mainColor2 }};
+  font-size: 16px;
+  padding-bottom: 0.5em;
+  border: none;
+  cursor: pointer;
   font-weight: bold;
-  font-size: 0.5em;
-  padding-left: 1em;
-  padding-right: 1em;
+  text-shadow: 1px 1px 0 #000000;
 }
+
+.header .dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: {{ site.mainColor2 }};
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.header .dropdown-content a {
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.header .dropdown-content a:hover {
+  color: {{ site.titleBGColor }};
+}
+
+.header .categories:hover .dropdown-content {
+  display: block;
+}
+
+/**
+ * Small site
+ */
+@media (max-width: 850px) {
+  .header .logo {
+    font-size: 20px;
+  }
+
+  .page {
+    grid-gap: 1em;
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "header"
+      "post"
+      "sidebar";
+  }
+
+  .sidebar {
+  }
+
+}
+
+
