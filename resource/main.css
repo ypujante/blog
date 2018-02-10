@@ -55,6 +55,7 @@ a:hover {
 
 .post {
   grid-area: post;
+  overflow: auto;
 }
 
 .post-footer {
@@ -186,6 +187,7 @@ div.nav .next {
   display: grid;
   grid-template-columns: auto auto;
   grid-gap: 1em;
+  text-align: left;
 }
 
 .posts-by-category .date {
@@ -296,9 +298,12 @@ a.nav-cc:hover {
       "header"
       "post"
       "sidebar"
-      "post-footer"
-  ;
+      "post-footer";
   }
+
+  .post-content pre {
+    font-size: 1.3em;
+   }
 }
 
 @media only screen and (max-width: 800px) {
@@ -310,8 +315,7 @@ a.nav-cc:hover {
       "header"
       "post"
       "sidebar"
-      "post-footer"
-  ;
+      "post-footer";
   }
 }
 
