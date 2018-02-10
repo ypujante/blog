@@ -70,38 +70,39 @@ a:hover {
  **************/
 /**
  * navigation / prev/next */
- table.nav {
-   width: 100%;
-   padding: 0 0.2em 0 0.2em;
+ div.nav {
+   padding: 0.2em;
    margin: 0;
+  font-weight: bold;
+  font-size: 1.3em;
+
 
   border-spacing: 0;
   border-top: solid 1px white;
   border-bottom: groove 1px white;
   background: {{ site.contentBGColor }};
- }
+  display: grid;
+  grid-template-columns: auto auto auto;
+}
 
- table.nav td.previous {
-   text-align: right;
- }
+div.nav .previous {
+  justify-self: end;
+  align-self: center;
+}
 
- table.nav td.home {
-   text-align: center;
- }
+div.nav .home {
+  justify-self: center;
+  align-self: center;
+}
 
- table.nav td {
-   font-size: 0.8em;
-   width: 33%;
- }
-
- .nav-arrow {
-    font-size: 1.5em;
- }
+div.nav .next {
+  justify-self: start;
+  align-self: center;
+}
 
 /**
  * post title */
 .post-title {
-   font-family: {{ site.monospaceFontFamily }};
    font-size: 1.5em;
    font-weight: bold;
    background: {{ site.titleBGColor }};
@@ -116,39 +117,6 @@ a:hover {
 
 /**
  * post info (date / categories) */
-.post-info .date {
-   display: inline-block;
-   border: solid 1px #444444;
-   -moz-box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-   -webkit-box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
- }
-
-.post-info .date .year {
-   background: {{ site.dateBackgroundColor }};
-   color: white;
-   text-align: center;
-   text-shadow: 1px 1px 0 #000000;
-   padding: 3px;
-   font-weight: bold;
- }
-
-.post-info .date .month-day {
-   background: {{ site.dateBackgroundColor }};
-   color: white;
-   text-align: center;
-   text-shadow: 1px 1px 0 #000000;
-   border-bottom: solid 1px #444444;
-   padding: 3px;
-   font-weight: bold;
- }
-
-.post-info .details {
-   vertical-align: middle;
-   display: inline-block;
-   font-size: 0.8em;
- }
-
 .post-info {
    padding: 0.5em 0.5em 0.5em 0.5em;
    background: {{ site.contentBGColor }};
@@ -214,24 +182,14 @@ a:hover {
 
 /**
  * Post by categories */
-table.posts-by-category {
-  border-collapse: collapse;
-  width: 100%;
-  margin-top: 1em;
+.posts-by-category {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-gap: 1em;
 }
 
-table.posts-by-category td {
+.posts-by-category .date {
   border-bottom: dotted 1px #aaaaaa;
-  padding-right: 0.5em;
-}
-
-/**
- * post comments */
-.post-comments {
-  color: {{ site.contentFGColor }};
-  background: {{ site.contentBGColor }};
-  padding: 1.5em;
-  border: solid 1px white;
 }
 
 /**
@@ -326,11 +284,10 @@ a.nav-cc:hover {
 /**
  * Small site
  */
-@media (max-width: 850px) {
-  .header .logo {
-    font-size: 20px;
+@media only screen and (max-device-width: 480px) {
+  html {
+    font-size: 1.5em;
   }
-
   .page {
     grid-gap: 1em;
     grid-template-columns: auto;
@@ -344,4 +301,17 @@ a.nav-cc:hover {
   }
 }
 
+@media only screen and (max-width: 800px) {
+  .page {
+    grid-gap: 1em;
+    grid-template-columns: auto;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "header"
+      "post"
+      "sidebar"
+      "post-footer"
+  ;
+  }
+}
 

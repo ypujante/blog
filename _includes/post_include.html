@@ -16,27 +16,24 @@
       <div class="post-title">
         {{ post.title }}
       </div>
-      <table class="nav">
-        <tr>
-          <td class="next">
-            {% if post.next %}
-            <a href="{{site.url}}{{ post.next.url }}" title="{{ post.next.title }}"><span class="nav-arrow">&larr;</span>&nbsp;Next</a>
-            {% endif %}
-          </td>
-          <td class="home"><a href="{{site.url}}" title="View latest post">Latest</a> | <a href="{{site.url}}/categories/All" title="View all posts">All</a></td>
-          <td class="previous">
-            {% if post.previous %}
-            <a href="{{site.url}}{{ post.previous.url }}" title="{{ post.previous.title }}">Previous&nbsp;<span class="nav-arrow">&rarr;</span></a>
-            {% endif %}
-          </td>
-        </tr>
-      </table>
-      <div class="post-info">
-        <div class="date">
-          <div class="month-day">{{post.date | date: "%b %d"}}</div>
-          <div class="year">{{post.date | date: "%Y"}}</div>
+      <div class="nav">
+        <div class="next">
+          {% if post.next %}
+          <a href="{{site.url}}{{ post.next.url }}" title="{{ post.next.title }}"><span class="nav-arrow">&larr;</span>&nbsp;Next</a>
+          {% endif %}
         </div>
-        <div class="details">Posted by Yan in
+        <div class="home"><a href="{{site.url}}" title="View latest post">Latest</a> | <a href="{{site.url}}/categories/All" title="View all posts">All</a></div>
+        <div class="previous">
+          {% if post.previous %}
+          <a href="{{site.url}}{{ post.previous.url }}" title="{{ post.previous.title }}">Previous&nbsp;<span class="nav-arrow">&rarr;</span></a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="post-content">
+        {{ content }}
+      </div>
+      <div class="post-info">
+        {{post.date | date: "%b %d %Y"}} - Posted by Yan in
           <ul class="post-categories">
             {% for category in post.categories %}
             <li><a href="{{site.url}}/categories/{{category}}"
@@ -44,9 +41,6 @@
             {% endfor %}
           </ul>
         </div>
-      </div>
-      <div class="post-content">
-        {{ content }}
       </div>
     </div>
   </div>
