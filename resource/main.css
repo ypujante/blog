@@ -26,24 +26,6 @@ a:hover {
   color: {{ site.mainColor1 }};
 }
 
-a.nav {
-   font-weight: bold;
-   text-shadow: 1px 1px 0 #000000;
- }
-
-a.nav:visited {
-   color: {{ site.titleFGColor }};
- }
-
-a.nav:link {
-   color: {{ site.titleFGColor }};
- }
-
-a.nav:hover {
-   text-decoration: none;
-   color: {{ site.titleBGColor }};
- }
- 
  tt, code {
    background: #dcdcdc;
  }
@@ -81,18 +63,6 @@ a.nav:hover {
 
 .header {
   grid-area: header;
-}
-
-.header {
-  -moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-  -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-  background: {{ site.mainColor2 }};
-  border: solid 1px {{ site.mainColor1 }};
-  padding: 0;
-
-  display: grid;
-  grid-template-columns: auto auto;
 }
 
 /**************
@@ -351,53 +321,6 @@ a.nav-cc:hover {
 
 .header .logo .highlight {
   text-shadow: 2px 2px 2px black;
-}
-
-/**
- * categories */
-.header .categories {
-  justify-self: right;
-  align-self: end;
-}
-
-.header .categories {
-  position: relative;
-  display: inline-block;
-}
-
-.header .dropbtn {
-  color: white;
-  background-color: {{ site.mainColor2 }};
-  font-size: 16px;
-  padding-bottom: 0.5em;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  text-shadow: 1px 1px 0 #000000;
-}
-
-.header .dropdown-content {
-  display: none;
-  position: absolute;
-  right: 0;
-  background-color: {{ site.mainColor2 }};
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
-}
-
-.header .dropdown-content a {
-  color: white;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-}
-
-.header .dropdown-content a:hover {
-  color: {{ site.titleBGColor }};
-}
-
-.header .categories:hover .dropdown-content {
-  display: block;
 }
 
 /**

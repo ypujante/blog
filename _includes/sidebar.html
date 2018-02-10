@@ -6,6 +6,17 @@
     <a href="https://www.linkedin.com/in/yan">LinkedIn profile</a>.
   </dd>
 </dl>
+<dl class="entry">
+  <dt>Categories</dt>
+  <dd>
+    <ul>
+      <li><a href="{{site.url}}/categories/All" title="View all posts">All</a></li>
+      {% for category in site.categories_list %}
+      <li><a href="{{site.url}}/categories/{{category}}" title="View posts in category {{ category }}">{{ category }}</a></li>
+      {% endfor %}
+    </ul>
+  </dd>
+<dl>
 {% if site.withTwitter and site.prodMode %}
 <dl class="entry">
   <dt>Social</dt>

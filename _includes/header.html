@@ -1,10 +1,1 @@
 <div class="logo">Br<span class="highlight">0</span>kenB<span class="highlight">1</span>ts</div>
-<div class="categories">
-  <button class="dropbtn">Categories</button>
-  <div class="dropdown-content">
-    <a class="nav" href="{{site.url}}" title="View latest post">Latest</a>
-    <a class="nav" href="{{site.url}}/categories/All" title="View all posts">All</a>
-    {% for category in site.categories_list %}
-    <a class="nav" href="{{site.url}}/categories/{{category}}" title="View posts in category {{ category }}">{{ category }}</a>{% endfor %}
-  </div>
-</div>
