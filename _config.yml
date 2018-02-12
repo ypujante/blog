@@ -16,8 +16,8 @@ contentFontFamily: 'Helvetica,Arial,sans-serif'
 monospaceFontFamily: 'Courier New,monospace'
 dateBackgroundColor: '#888888'
 
-# since jekyll 3.0...
-gems:
+# since jekyll 3.7.2...
+plugins:
 - jekyll-textile-converter
 
 # post related entries
