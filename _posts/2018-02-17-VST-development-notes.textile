@@ -1,0 +1,112 @@
+---
+layout: post
+title: "VST Development Notes"
+category: vst
+tags:
+ - vst2
+ - vst3
+ - music
+---
+As I am learning about VST development I wanted to share my notes, first as a way to document my own understanding for the future and second as a way to help others following a similar path.
+
+<div class="warning">This is currently a work in progress. This is not meant to be generic for all platforms and is only focusing on macOS.</div>
+
+h2. Configuration
+
+At the time of this writing (February 2018) I am using: 
+
+* Hardware: MacBook Pro (Mid 2014) / 2.8Ghz Intel Core i7 / 16GB
+* macOS High Sierra 10.13.3
+* XCode 9.2
+
+h2. Notes
+
+h3. Install
+
+Version VST 3 / 368 (vstsdk368_08_11_2017_build_121) downloaded from "Steinberg":https://www.steinberg.net/en/company/developers.html
+
+After unpacking, run 
+
+{% highlight text %}
+./copy_vst2_to_vst3_sdk.sh
+{% endhighlight %}
+
+to make sure that we can build VST2 wrappers as well (VST3 is very poorly supported, ex: Maschine by Native Instruments or Reason by Properllerhead do not support it)
+
+h3. Documentation
+
+Documentation starts with <code>VST3_SDK/index.html</code> and is not really beginner friendly.
+
+h3. Building the SDK
+
+Unlike what the documentation states (_"How to use cmake for Building VST 3 Plug-in"_), CMake is not used to build VST 3 plugins. CMake is used to generate a platform dependent project (ex: XCode project for Mac, Visual Studio project for Windows). This project (hence the build framework associated with it) is then used (not CMake!) to build the examples provided in the sdk as well as compile the SDK itself (multiple libraries) and some tools.
+
+This still does not explain how to build your OWN vst plugins.
+
+h4. Generate XCode project
+
+* Run <code>cmake-gui</code> (version 3.9.4 installed from "CMake download":https://cmake.org/download/) from anywhere.
+* In the <code>Where is the source code:</code> field, point to the <code>VST3_SDK</code> folder.
+* In the <code>Where to build the binaries:</code> field, point to any folder you want but since it will create a project whose purpose is to build the SDK I choose to put it at the same level as <code>VST3_SDK</code> and call it <code>build</code>.
+* Click <code>Configure</code> (and approve creation of the output folder if it does not exist).
+* Select <code>Xcode</code> for the _generator_ for this project.
+* Once the configuration completes, the Name/Value section will have some default values. Check the <code>SMTG_CREATE_VST2_VERSION</code> option because we want to build VST2 plugins as well.
+* Click <code>Generate</code>
+
+h4. Build the again example
+
+<div class="info">All this is relative to the <code>Where to build the binaries:</code> folder previously set (which in my case is <code><SDK_ROOT>/build</code>)</div>
+
+* Under the output folder previously selected there is now a Xcode project called <code>vstsdk</code>. Double click to open in Xcode.
+* In the <code>Scheme</code> selection dropdown (on the right of the buttons that look like play & stop), select <code>again / My Mac</code>
+* Now select menu <code>Product/Build</code> to build <code>again</code> plugin
+* The result of the build will be stored under <code>VST3/Debug/again.vst3</code>
+* As a side effect of this build, some libraries were generated (under <code>lib/Debug</code>) and a validator tool (<code>bin/Debug/validator</code>)
+* Run the validator tool:
+
+{% highlight text %}
+./bin/Debug/validator VST3/Debug/again.vst3
+...
+* Scanning classes...
+
+  Factory Info:
+	vendor = Steinberg Media Technologies
+	url = http://www.steinberg.net
+	email = mailto:info@steinberg.de
+
+  Class Info 0:
+	name = AGain VST3
+	category = Audio Module Class
+	cid = 84E8DE5F92554F5396FAE4133C935A18
+
+  Class Info 1:
+	name = AGain VST3Controller
+	category = Component Controller Class
+	cid = D39D5B65D7AF42FA843F4AC841EB04F0
+
+  Class Info 2:
+	name = AGain SideChain VST3
+	category = Audio Module Class
+	cid = 41347FD6FED64094AFBB12B7DBA1D441
+...
+-------------------------------------------------------------
+Result: 78 tests passed, 0 tests failed
+-------------------------------------------------------------
+{% endhighlight %}
+
+* Copy the plugin as a VST2 plugin for local testing
+{% highlight text %}
+cp -r VST3/Debug/again.vst3 ~/Library/Audio/Plug-Ins/VST/again.vst
+{% endhighlight %}
+
+* Open a DAW application (Maschine in my example) and assign the plugin to a sound (the plugin is under <code>Steinberg Media Technologies</code>)
+
+h3. TO BE CONTINUED
+
+Open questions:
+
+* How to build your own plugin OUTSIDE the SDK. Ideally depending only on header files and libraries generated during the previous build
+* How to build in Release mode
+
+This post will be updated soon...
+
