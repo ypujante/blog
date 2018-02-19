@@ -39,9 +39,11 @@ Documentation starts with <code>VST3_SDK/index.html</code> and is not really beg
 
 h3. Building the SDK
 
-Unlike what the documentation states (_"How to use cmake for Building VST 3 Plug-in"_), CMake is not used to build VST 3 plugins. CMake is used to generate a platform dependent project (ex: XCode project for Mac, Visual Studio project for Windows). This project (hence the build framework associated with it) is then used (not CMake!) to build the examples provided in the sdk as well as compile the SDK itself (multiple libraries) and some tools.
+The section named _"How to use cmake for Building VST 3 Plug-in"_ is a bit confusing to me
 
-This still does not explain how to build your OWN vst plugins.
+* first of all, CMake is not used (directly) to build VST 3 plugins. CMake is used to generate a platform dependent project (ex: XCode project for Mac, Visual Studio project for Windows). This project (hence the build framework associated with it) is then used to build the examples provided in the sdk as well as compile the SDK itself (multiple libraries) and some tools.
+
+* second of all, this section has no explanation on how you build your OWN VST plugins.
 
 h4. Generate XCode project
 
