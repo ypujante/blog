@@ -38,7 +38,7 @@ h3. Documentation
 
 Documentation starts with <code>VST3_SDK/index.html</code> and is not really beginner friendly.
 
-h3. Building the SDK
+h3. Building the SDK and examples
 
 The section named _"How to use cmake for Building VST 3 Plug-in"_ is a bit confusing to me
 
@@ -100,6 +100,8 @@ Result: 78 tests passed, 0 tests failed
 -------------------------------------------------------------
 {% endhighlight %}
 
+<div class="info">Note that the <code>validator</code> tool is actually run automatically part of the build (it is an option in the cmake build file which is ON by default).</div>
+
 * Copy the plugin as a VST2 plugin for local testing
 {% highlight text %}
 cp -r VST3/Debug/again.vst3 ~/Library/Audio/Plug-Ins/VST/again.vst
@@ -111,7 +113,34 @@ h4. Building the SDK (with CLion)
 
 "Clion":https://www.jetbrains.com/clion/ can actually work directly with CMake thus making the process more straighforward and cleaner as you are only dealing with the original project. The drawback of using the previous approach (using CMake to generate an Xcode project) is that if you modify the Xcode project (for example add a resource to a plugin) it is not reflected in the CMake world. On the other end, CLion shows the original project and use CMake directly, so as a result if you add a resource to the project it will be added to the CMake world.
 
-* Simply open the project with CLion (folder <code>VST3_SDK</code>)
+<div class="warning">Unfortunately, the _hack_ that was introduced by Steinberg in the <code>again/CMakeLists.txt</code> build file for handling VST2 is Xcode specific and does not work with CLion (or simple Makefiles). In order to fix this issue and make it Mac specific (vs Xcode specific), you need to:
+</div>
+
+* add a file <code>public.sdk/source/main/macexport_vst2.exp</code> with the following content (exporting the VST3 specific symbols + the VST2 specific one to make the plugin work either as a VST3 or VST2 plugin)
+{% highlight text %}
+_GetPluginFactory
+_bundleEntry
+_bundleExit
+_VSTPluginMain
+{% endhighlight %}
+
+* change the <code>again/CMakeLists.txt</code> section to use it
+
+{% highlight text %}
+if (SMTG_CREATE_VST2_VERSION)
+  message(STATUS "SMTG_CREATE_VST2_VERSION is set for ${target}. A VST 2 version of the plug-in will be created (just rename the generated file from .vst3 to .vst).")
+  if(MAC)
+  # fix missing VSTPluginMain symbol when also building VST 2 version
+    smtg_set_exported_symbols(${target} "${SDK_ROOT}/public.sdk/source/main/macexport_vst2.exp")
+  endif()
+  if (WIN)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  endif()
+endif()
+{% endhighlight %}
+
+
+* Once this is done you can simply open the project with CLion (folder <code>VST3_SDK</code>)
 * Then under the menu <code>Preferences / Build,Execution,Deployment / CMake</code> add the <code>CMake options</code>: 
 {% highlight text %}
 -DSMTG_CREATE_VST2_VERSION=ON
@@ -120,16 +149,32 @@ h4. Building the SDK (with CLion)
 * Select the <code>again | Debug</code> configuration (similar to Xcode scheme) and select the menu item <code>Run / Build</code>
 * The outcome will be under <code>VST3</code> (relative to <code>Generation Path</code>)
 
-Testing with <code>validator</code> and deploying to a DAW are the same as the Xcode section with the difference that there is no <code>Debug</code> subfolders.
+Testing with <code>validator</code> and deploying to a DAW are the same as the Xcode section with the difference that there is no <code>Debug</code> subfolders (if you use the default <code>Generation Path</code>, the <code>debug</code> is part of the directory name).
 
-h3. TO BE CONTINUED
+<div class="info">Note that the <code>validator</code> tool is actually run automatically part of the build (it is an option in the cmake build file which is ON by default).</div>
 
-Open questions:
+h3. Building your own VST plugin
 
-* How to build your own plugin OUTSIDE the SDK. Ideally depending only on header files and libraries generated during the previous build
-* How to build in Release mode
+After spending quite a bit of time trying to figure out how to build my own VST plugin, it boggles my mind that there is no instructions on how to do that at all.
+
+All the examples are nested inside the SDK and their <code>CMakeLists.txt</code> build file depend on the fact that they are inside the SDK and included by the top level one: variables defined at a higher level, cmake functions included at a higher level, etc... So every single sample build file does not provide any example of building a VST plugin outside the SDK. In fact the documentation does not even talk about how you would go about building your own. They don't even mention: _"simply copy an example and modify it"_ which seems to be the most obivous one. Nothing.
+
+Just let that sink in for a second... Imagine wanting to build an android app. You download the android SDK and all the android app examples that come with the SDK are deeply nested in the SDK and every build file depend on the fact that they are located inside the SDK. And in order to build an android app (without rewriting all the build files), you need to physically locate your files inside the android SDK. Wouldn't this be crazy? Well that is what the VST3 SDK does (to the best of my understanding)...
+
+h4. Building your own first VST plugin (the dirty way)
+
+Moving forward I am using CLion as it is a lot easier and remove the extra step of building an Xcode or Visual Studio project. I am calling this method _the dirty way_ because it ends up locating the plugin inside the SDK (see previous section).
+
+* to minimize the _crazyness_ of this approach, I copied the <code>again</code> example *outside* the SDK and renamed it <code>MyAgain</code>. And because it is outside the SDK, I can actually put it under version control...
+<div class="warning">Make sure you copy <code>again</code> after the fix of the hack for VST2 support (as described previously)</div>
+* I then create a symbolic link inside the <code>public.sdk/samples/vst</code> folder.
+* I then open the project in CLion using the root of the SDK (<code>VST3_SDK</code>)
+* In CLion <code>Preferences / Version Control</code> you can specify a directory under version control and once you do, then _magically_ your files are properly flagged in the editor!
+* I then modified a few values in <code>version.h</code> and <code>againentry.cpp</code> to change the name of the plugin and the author.
+* There is now a new configuration to build the plugin <code>MyAgain | Debug</code> which can be selected to build the new plugin.
+* It can then be deployed as described previously (copy/rename in the <code>~/Library/Audio/Plug-Ins/VST/</code>)
 
 This post will be updated soon...
 
-_Last edited: 2018/02/20_
+_Last edited: 2018/02/26_
 
