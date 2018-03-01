@@ -149,7 +149,7 @@ endif()
 * Select the <code>again | Debug</code> configuration (similar to Xcode scheme) and select the menu item <code>Run / Build</code>
 * The outcome will be under <code>VST3</code> (relative to <code>Generation Path</code>)
 
-Testing with <code>validator</code> and deploying to a DAW are the same as the Xcode section with the difference that there is no <code>Debug</code> subfolders (if you use the default <code>Generation Path</code>, the <code>debug</code> is part of the directory name).
+Testing with <code>validator</code> and deploying to a DAW are the same as the Xcode section with the difference that there is no <code>Debug</code> subfolders (if you use the default <code>Generation Path</code>, the <code>debug</code> concept is part of the directory name).
 
 <div class="info">Note that the <code>validator</code> tool is actually run automatically part of the build (it is an option in the cmake build file which is ON by default).</div>
 
@@ -172,9 +172,17 @@ Moving forward I am using CLion as it is a lot easier and remove the extra step 
 * In CLion <code>Preferences / Version Control</code> you can specify a directory under version control and once you do, then _magically_ your files are properly flagged in the editor!
 * I then modified a few values in <code>version.h</code> and <code>againentry.cpp</code> to change the name of the plugin and the author.
 * There is now a new configuration to build the plugin <code>MyAgain | Debug</code> which can be selected to build the new plugin.
-* It can then be deployed as described previously (copy/rename in the <code>~/Library/Audio/Plug-Ins/VST/</code>)
+* It can then be deployed as described previously (copy/rename in the <code>~/Library/Audio/Plug-Ins/VST/</code> folder)
+
+h4. Building your own first VST plugin (cleaner way)
+
+After struggling quite a bit, I was able to extract the right portions of the build files in order to build the <code>again</code> plugin completely outside the SDK: the idea is that the <code>CMakeLists.txt</code> of the project _includes_ (a modified version of) the one coming with the SDK and _relies_ on its location (<code>VST3_SDK_ROOT</code>). The full source code is available on github "vst3-again-sample":https://github.com/pongasoft/vst3-again-sample
+
+<div class="info">Note that this project includes the proper fix for VST2 so there is no need to patch the SDK.</div>
+
+It is probably not the best solution but that is the best I could do. It does achieve the fact that it is a self contained, properly version controlled project, which depends on the SDK. I just wished Steinberg was distributing the SDK with a native/tested/bullet proof way to do this.
 
 This post will be updated soon...
 
-_Last edited: 2018/02/26_
+_Last edited: 2018/03/01_
 
