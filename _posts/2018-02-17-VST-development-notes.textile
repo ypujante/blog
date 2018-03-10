@@ -184,7 +184,7 @@ It is probably not the best solution but that is the best I could do. It does ac
 
 h3. Next
 
-Now that we know how to build any VST 3 plugin (as well as VST 2) while depending on the SDK, it is time to build your own. This is the point of "Part 2":/vst/2018/03/10/VST-development-notes-part2.
+Now that we know how to build any VST 3 plugin (as well as VST 2) while depending on the SDK, it is time to build your own. This is the point of "Part 2":{{site.url}}/vst/2018/03/10/VST-development-notes-part2.
 
 _Last edited: 2018/03/10_
 
