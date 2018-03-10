@@ -21,7 +21,6 @@ plugins:
 - jekyll-textile-converter
 
 # post related entries
-withLinkedIn: true
 withTwitter: true
 withGoogle: true
 prodMode: true

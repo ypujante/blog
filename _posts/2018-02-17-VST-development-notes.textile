@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "VST Development Notes"
+title: "VST Development Notes - Part 1"
 category: vst
 tags:
  - vst2
@@ -9,7 +9,7 @@ tags:
 ---
 As I am learning about VST development I wanted to share my notes, first as a way to document my own understanding for the future and second as a way to help others following a similar path.
 
-<div class="warning">This is currently a work in progress. This is not meant to be generic for all platforms and is only focusing on macOS.</div>
+<div class="warning">This is not meant to be generic for all platforms and is only focusing on macOS.</div>
 
 h2. Configuration
 
@@ -32,7 +32,7 @@ After unpacking, run
 ./copy_vst2_to_vst3_sdk.sh
 {% endhighlight %}
 
-to make sure that we can build VST2 wrappers as well (VST3 is very poorly supported, ex: Maschine by Native Instruments or Reason by Properllerhead do not support it)
+to make sure that we can build VST2 wrappers as well (VST3 is very poorly supported, ex: Maschine by Native Instruments or Reason by Propellerhead do not support it)
 
 h3. Documentation
 
@@ -111,7 +111,7 @@ cp -r VST3/Debug/again.vst3 ~/Library/Audio/Plug-Ins/VST/again.vst
 
 h4. Building the SDK (with CLion)
 
-"Clion":https://www.jetbrains.com/clion/ can actually work directly with CMake thus making the process more straighforward and cleaner as you are only dealing with the original project. The drawback of using the previous approach (using CMake to generate an Xcode project) is that if you modify the Xcode project (for example add a resource to a plugin) it is not reflected in the CMake world. On the other end, CLion shows the original project and use CMake directly, so as a result if you add a resource to the project it will be added to the CMake world.
+"Clion":https://www.jetbrains.com/clion/ can actually work directly with CMake thus making the process more straightforward and cleaner as you are only dealing with the original project. The drawback of using the previous approach (using CMake to generate an Xcode project) is that if you modify the Xcode project (for example add a resource to a plugin) it is not reflected in the CMake world. On the other end, CLion shows the original project and use CMake directly, so as a result if you add a resource to the project it will be added to the CMake world.
 
 <div class="warning">Unfortunately, the _hack_ that was introduced by Steinberg in the <code>again/CMakeLists.txt</code> build file for handling VST2 is Xcode specific and does not work with CLion (or simple Makefiles). In order to fix this issue and make it Mac specific (vs Xcode specific), you need to:
 </div>
@@ -126,7 +126,7 @@ _VSTPluginMain
 
 * change the <code>again/CMakeLists.txt</code> section to use it
 
-{% highlight text %}
+{% highlight cmake %}
 if (SMTG_CREATE_VST2_VERSION)
   message(STATUS "SMTG_CREATE_VST2_VERSION is set for ${target}. A VST 2 version of the plug-in will be created (just rename the generated file from .vst3 to .vst).")
   if(MAC)
@@ -157,7 +157,7 @@ h3. Building your own VST plugin
 
 After spending quite a bit of time trying to figure out how to build my own VST plugin, it boggles my mind that there is no instructions on how to do that at all.
 
-All the examples are nested inside the SDK and their <code>CMakeLists.txt</code> build file depend on the fact that they are inside the SDK and included by the top level one: variables defined at a higher level, cmake functions included at a higher level, etc... So every single sample build file does not provide any example of building a VST plugin outside the SDK. In fact the documentation does not even talk about how you would go about building your own. They don't even mention: _"simply copy an example and modify it"_ which seems to be the most obivous one. Nothing.
+All the examples are nested inside the SDK and their <code>CMakeLists.txt</code> build file depend on the fact that they are inside the SDK and included by the top level one: variables defined at a higher level, cmake functions included at a higher level, etc... So every single sample build file does not provide any example of building a VST plugin outside the SDK. In fact the documentation does not even talk about how you would go about building your own. They don't even mention: _"simply copy an example and modify it"_ which seems to be the most obvious one. Nothing.
 
 Just let that sink in for a second... Imagine wanting to build an android app. You download the android SDK and all the android app examples that come with the SDK are deeply nested in the SDK and every build file depend on the fact that they are located inside the SDK. And in order to build an android app (without rewriting all the build files), you need to physically locate your files inside the android SDK. Wouldn't this be crazy? Well that is what the VST3 SDK does (to the best of my understanding)...
 
@@ -165,7 +165,7 @@ h4. Building your own first VST plugin (the dirty way)
 
 Moving forward I am using CLion as it is a lot easier and remove the extra step of building an Xcode or Visual Studio project. I am calling this method _the dirty way_ because it ends up locating the plugin inside the SDK (see previous section).
 
-* to minimize the _crazyness_ of this approach, I copied the <code>again</code> example *outside* the SDK and renamed it <code>MyAgain</code>. And because it is outside the SDK, I can actually put it under version control...
+* to minimize the _craziness_ of this approach, I copied the <code>again</code> example *outside* the SDK and renamed it <code>MyAgain</code>. And because it is outside the SDK, I can actually put it under version control...
 <div class="warning">Make sure you copy <code>again</code> after the fix of the hack for VST2 support (as described previously)</div>
 * I then create a symbolic link inside the <code>public.sdk/samples/vst</code> folder.
 * I then open the project in CLion using the root of the SDK (<code>VST3_SDK</code>)
@@ -182,7 +182,9 @@ After struggling quite a bit, I was able to extract the right portions of the bu
 
 It is probably not the best solution but that is the best I could do. It does achieve the fact that it is a self contained, properly version controlled project, which depends on the SDK. I just wished Steinberg was distributing the SDK with a native/tested/bullet proof way to do this.
 
-This post will be updated soon...
+h3. Next
 
-_Last edited: 2018/03/01_
+Now that we know how to build any VST 3 plugin (as well as VST 2) while depending on the SDK, it is time to build your own. This is the point of "Part 2":/vst/2018/03/10/VST-development-notes-part2.
+
+_Last edited: 2018/03/10_
 
