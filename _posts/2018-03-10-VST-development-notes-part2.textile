@@ -1,12 +1,14 @@
 ---
 layout: post
-title: "VST Development Notes - Part 2"
+title: "VST (3.6.8) Development Notes - Part 2"
 category: vst
 tags:
  - vst2
  - vst3
  - music
 ---
+<div class="warning">I am currently in the process of updating these notes for 3.6.9 which was released on 2018/03/01. There are some issues with the new version that I am trying to sort out... stay tuned... As a result these instructions are 3.6.8 specific only.</div>
+
 In "Part1":{{site.url}}/vst/2018/02/17/VST-development-notes, I described my first steps in installing the VST3 SDK and compiling a basic plugin in its own environment. Part2 focuses on the content of a plugin. For this exercise, I am reimplementing the "A/B Audio Switch":https://pongasoft.com/rack-extensions/ABSwitch.html rack extension since the logic is fairly simple while still touching many areas of plugin development.
 
 <div class="warning">This is currently a work in progress and will be updated regularly. This is not meant to be generic for all platforms and is only focusing on macOS. Check "Part1":{{site.url}}/vst/2018/02/17/VST-development-notes for platform requirements and assumptions.</div>
@@ -234,4 +236,4 @@ At this stage we have a fully functioning VST3 and VST2 plugin which simply remo
 
 Stay tuned for Part 3...
 
-_Last edited: 2018/03/10_
+_Last edited: 2018/03/12_
