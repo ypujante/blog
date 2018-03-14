@@ -1,21 +1,19 @@
 ---
 layout: post
-title: "VST (3.6.8) Development Notes - Part 2"
+title: "VST (3.6.9) Development Notes - Part 2"
 category: vst
 tags:
  - vst2
  - vst3
  - music
 ---
-<div class="warning">I am currently in the process of updating these notes for 3.6.9 which was released on 2018/03/01. There are some issues with the new version that I am trying to sort out... stay tuned... As a result these instructions are 3.6.8 specific only.</div>
+In "Part1":{{site.url}}/vst/2018/03/12/VST-development-notes, I described my first steps in installing the VST3 SDK and compiling a basic plugin in its own environment. Part2 focuses on the content of a plugin. For this exercise, I am reimplementing the "A/B Audio Switch":https://pongasoft.com/rack-extensions/ABSwitch.html rack extension since the logic is fairly simple while still touching many areas of plugin development.
 
-In "Part1":{{site.url}}/vst/2018/02/17/VST-development-notes, I described my first steps in installing the VST3 SDK and compiling a basic plugin in its own environment. Part2 focuses on the content of a plugin. For this exercise, I am reimplementing the "A/B Audio Switch":https://pongasoft.com/rack-extensions/ABSwitch.html rack extension since the logic is fairly simple while still touching many areas of plugin development.
-
-<div class="warning">This is currently a work in progress and will be updated regularly. This is not meant to be generic for all platforms and is only focusing on macOS. Check "Part1":{{site.url}}/vst/2018/02/17/VST-development-notes for platform requirements and assumptions.</div>
+<div class="warning">This is currently a work in progress and will be updated regularly. This is not meant to be generic for all platforms and is only focusing on macOS. Check "Part1":{{site.url}}/vst/2018/03/12/VST-development-notes for platform requirements and assumptions.</div>
 
 h3. Setup
 
-This project is available on github: "vst-ab-switch":https://github.com/pongasoft/vst-ab-switch. Make sure you checkout the <code>blog-part2</code> tag in order to follow along with this part.
+This project is available on github: "vst-ab-switch":https://github.com/pongasoft/vst-ab-switch. Make sure you checkout the <code>blog-part2-369</code> tag in order to follow along with this part.
 
 <div class="info">As mentioned in Part 1, I am now using CLion exclusively but it should be fairly trivial to generate the Xcode project or using <code>cmake</code> directly as explained in Part 1.</div>
 
@@ -43,7 +41,7 @@ static const ::Steinberg::FUID ABSwitchProcessorUID(0x8d605466, 0x25154967, 0x85
 static const ::Steinberg::FUID ABSwitchControllerUID(0x82aea4a3, 0x5b4e4a5f, 0xa3d68b1a, 0x8a1b69c5);
 {% endhighlight %}
 
-There is no indication in the documentation about how you are supposed to generate those IDs. The source code for class <code>FUID</code> states _"Handling 16 Byte Globally Unique Identifiers"_. It is not clear whether this ID needs to be unique across all plugins or just unique within the plugin itself (without colliding with the SDK). I generated these using java <code>java.lang.UUID.randomUUID()</code> (see "javadoc":https://docs.oracle.com/javase/9/docs/api/java/util/UUID.html).
+The helloworld plugin that comes with the SDK specifies: _"you can use GUID creator tools like "www.guidgenerator.com":https://www.guidgenerator.com/"_ in order to generate those IDS. I generated these using java <code>java.lang.UUID.randomUUID()</code> (see "javadoc":https://docs.oracle.com/javase/9/docs/api/java/util/UUID.html), but feel free to use the website suggested.
 
 h4. VST2 entry point
 
@@ -218,8 +216,8 @@ IPlugView *ABSwitchController::createView(const char *name)
 This class will read the provided xml file to build the GUI (it is empty so it will render a black square...). This class has an editing mode which allows you to create the UI on the fly with an editor (by right clicking in the UI)! The documentation (section VSTGUI 4 / Inline UI Editing for VST3 (WYSIWYG)) explains the various steps to make it happen (seems complicated), but in my experience it is already built-in in the makefiles so it is quite easy:
 
 {% highlight cmake %}
-# from VST3_SDK.cmake
-add_compile_options($<$<CONFIG:Debug>:-DVSTGUI_LIVE_EDITING=1>)
+# from AddVST3Library.cmake
+target_compile_definitions(${target} PUBLIC $<$<CONFIG:Debug>:VSTGUI_LIVE_EDITING=1>)
 {% endhighlight %}
 
 As long as you compile in <code>Debug</code> mode the editor is enabled. Simple.
@@ -227,7 +225,8 @@ As long as you compile in <code>Debug</code> mode the editor is enabled. Simple.
 Although you can start your DAW to load the plugin, the SDK comes with a simple <code>editorhost</code> application (similar to the <code>validator</code> application (see Part 1)) which lets you load the plugin and edit it:
 
 {% highlight bash %}
-./vst3-sdk.368/Debug/bin/editorhost.app/Contents/MacOS/editorhost ./vst-ab-switch/Debug/VST3/pongasoft_ABSwitch.vst3
+# you may need to compile this app separately
+./vst3-sdk.369/Debug/bin/editorhost.app/Contents/MacOS/editorhost ./vst-ab-switch/Debug/VST3/pongasoft_ABSwitch.vst3
 {% endhighlight %}
 
 h3. What we have so far
@@ -236,4 +235,4 @@ At this stage we have a fully functioning VST3 and VST2 plugin which simply remo
 
 Stay tuned for Part 3...
 
-_Last edited: 2018/03/12_
+_Last edited: 2018/03/14_
