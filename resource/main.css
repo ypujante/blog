@@ -181,6 +181,15 @@ div.nav .next {
   padding: 10px;
 }
 
+.post-content figure.image {
+  text-align: center;
+}
+
+.post-content figure.image figcaption {
+  color: #999999;
+  font-style: italic;
+}
+
 /**
  * Post by categories */
 .posts-by-category {

@@ -271,7 +271,7 @@ Testing with <code>validator</code> and deploying to a DAW are the same as the X
 
 h3. Next
 
-Now that we know how to build any VST 3 plugin (as well as VST 2) while depending on the SDK, it is time to build your own. This is the point of "Part 2":{{site.url}}/vst/2018/03/14/VST-development-notes-part2.
+Now that we know how to build any VST 3 plugin (as well as VST 2) while depending on the SDK, it is time to build your own. This is the point of "Part 2":{{site.url}}{% post_url 2018-03-14-VST-development-notes-part2 %}.
 
 _Last edited: 2018/03/14_
 
