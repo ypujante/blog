@@ -44,6 +44,9 @@ To add the toggle, I used the <code>OnOff Button</code> view (<code>COnOffButton
 In order for the button to have an image that will change when the toggle is clicked, you need to:
 
 * create one image that contains the 2 frames on top of each other. Or in other words, the image is twice as tall (see the file <code>resource/Control_AudioSwitch.png</code>).
+
+<figure class="image"><img src="https://github.com/pongasoft/vst-ab-switch/raw/blog-part3-369/resource/Control_AudioSwitch.png" alt="Control_AudioSwitch.png" border="0" style=""/><figcaption>The image contains 2 frames </figcaption></figure>
+
 * on the <code>Bitmaps</code> tab of the bottom right panel, click the <code>+</code> and select the image
 * now in the parameters area, you can now select the image you just added, in the dropdown of the <code>bitmap</code> entry.
 
