@@ -1,0 +1,93 @@
+---
+layout: post
+title: "VST (3.6.9) Development Notes - Part 4"
+category: vst
+tags:
+ - vst2
+ - vst3
+ - music
+---
+In "Part 3":{{site.url}}{% post_url 2018-03-17-VST-development-notes-part3 %}, we created a fully functioning VST2/VST3 plugin which was capable of switching between 2 inputs. This post features some notes about the remaining of the implementation to be fully code complete (without a pretty UI).
+
+<div class="warning">Check "Part 1":{{site.url}}{% post_url 2018-03-12-VST-development-notes %} for platform requirements and assumptions.</div>
+
+h3. Setup
+
+This project is available on github: "vst-ab-switch":https://github.com/pongasoft/vst-ab-switch. Make sure you checkout the <code>blog-part4-369</code> tag in order to follow along with this part (or "browse":https://github.com/pongasoft/vst-ab-switch/tree/blog-part4-369 the code directly on github)
+
+<div class="info">As mentioned in Part 1, I am now using CLion exclusively but it should be fairly trivial to generate the Xcode project or using <code>cmake</code> directly as explained in Part 1.</div>
+
+All the source files are located under <code>src/cpp</code>
+
+h3. Creating a UI only text edit field
+
+The plugin allows you to give a name to each input. This field is purely UI (the processor does not care about it). But it still needs to be saved as part of the state so that the names are preserved. It turned out to be a much more complicated task that anticipated. Adding a "Text Field" view in the editor (class <code>CTextEdit</code>) and equivalent parameter in the controller like we did for the Audio Switch control actually does not work! A parameter *must* represent a value (between 0 and 1) not a pure string.
+
+In order to do achieve this here are the steps I ended up following (check the source code for details):
+
+* using the editor, added a "Text Field" view (class <code>CTextField</code>) for each input
+* assign the view to a tag so that we can get a hold of it in the code
+* changed the controller to inherit from <code>VSTGUI::VST3EditorDelegate</code> in order to override the <code>verifyView</code> method which is the place where we can get a hold of the views
+* implemented the <code>getState</code> and <code>setState</code> method which deal with the UI state only (<code>setComponentState</code> deals with the processor state!) in order to save/restore the text.
+
+Although it does make sense in hindsight, the views are actually not created when the plugin is loaded. The processor and controller classes are instantiated and initialized (via the various <code>set*State</code> methods) when the plugin gets loaded. The views are actually only created when the UI portion of the plugin is displayed (which usually happens when double clicking on the loaded plugin in a DAW). And when the UI portion is closed they get destroyed!
+
+This is the reason why I ended up creating a <code>StringTextEdit</code> class whose lifespan matches the controller (the controller owns them): this class is in charge of keeping the actual text of the field. When a view is created (when the UI is opened) it gets assigned to this class (<code>assignTextEdit</code>) at which point the view gets initialized with the text value and a couple of listeners are registered:
+* <code>valueChanged</code> so that it gets notified if the user modifies the string
+* <code>viewWillDelete</code> so that it gets notified when the view is closed (and can deregister the listeners)
+
+As you can see this is a lot more involved than simply adding a parameter!
+
+<div class="warning">_Rant_: string handling is a big mess in the SDK with types like <code>String</code>, <code>ConstString</code>, <code>UTF8String</code>, <code>char8</code>, <code>tchar</code>, <code>STR16</code> (macro), <code>USTRING</code> (macro), and much more...  Here is an example: <code>CTextEdit.getText()</code> returns a <code>UTF8String</code> string, but the method <code>IBStream.writeStringUtf8</code> expects a <code>const tchar* ptr</code> which are not compatible...</div>
+
+h3. Soften/Cross fade feature
+
+Adding this feature was not too hard: from a UI point of view it is just another On/Off button and is tied to a "standard" parameter. From the processor point of view, it requires to keep track of the previous state of the switch since cross fading happens *only* when transitioning from one input to the next.
+
+The actual implementation is simply doing a linear interpolation between the 2 inputs for the duration of the frame. I reused the concept of templated code (introduced in the again sample coming with the SDK) and enhanced it a little bit to avoid dealing with <code>void **</code> pointers... Templates can be pretty powerful!
+
+{% highlight cpp %}
+// Use of template to retrieve the proper buffer
+template<typename SampleType>
+inline SampleType** getBuffer(AudioBusBuffers &buffer);
+
+// specialization for Sample32
+template<>
+inline Sample32** getBuffer(AudioBusBuffers &buffer) { return buffer.channelBuffers32; }
+
+// specialization for Sample64
+template<>
+inline Sample64** getBuffer(AudioBusBuffers &buffer) { return buffer.channelBuffers64; }
+
+template<typename SampleType>
+tresult linearCrossFade(AudioBusBuffers &audioBufferIn1,
+                        AudioBusBuffers &audioBufferIn2,
+                        AudioBusBuffers &audioBufferOut,
+                        int32 numSamples)
+{
+  ...
+  
+  SampleType** in1 = getBuffer<SampleType>(audioBufferIn1);
+  SampleType** in2 = getBuffer<SampleType>(audioBufferIn2);
+  SampleType** out = getBuffer<SampleType>(audioBufferOut);
+
+  ...
+}
+{% endhighlight %}
+
+h3. Adding a processor controlled parameter
+
+The plugin has an LED light which shows whether there is sound or not going on, or in other words a very simplistic VU meter. The again sample provided with the SDK has a full VU meter so it was easy to follow the steps which are not too hard.
+
+* added another On/Off button in the editor
+* this component gets registered as a parameter in the controller but this time with a flag of <code>ParameterInfo::kIsReadOnly</code> since it is only modified by the code not the user
+* the processor determines if there is sound or not in the frame being rendered and communicates the result to the UI using the <code>data.outputParameterChanges</code> concept. Note that the value is communicated *only* when it changes!
+* since this is a transient and dynamic/computed value it does not get saved with the state of the plugin
+
+Check the code for more details.
+
+h3. Conclusion
+
+At this stage, the plugin pretty much reimplements all the features of the rack extension (minus CV handling which does not exist in VST). The next step is to make the UI look decent ;)
+
+_Last edited: 2018/03/24_

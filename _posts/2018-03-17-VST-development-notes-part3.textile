@@ -250,4 +250,8 @@ h3. Conclusion
 
 At this stage we have a fully working A/B switch. It's not pretty, it doesn't have all the bells and whistle of the Rack Extension but the core part of the plugin is doing what it is supposed to do. The final version should be very similar to the Rack Extension (minus CV handling which is not available in the VST world :( ).
 
-_Last edited: 2018/03/18_
+h3. Next
+
+Check out "Part 4":{{site.url}}{% post_url 2018-03-24-VST-development-notes-part4 %} for some more notes and comments regarding the remainder of the implementation.
+
+_Last edited: 2018/03/24_
