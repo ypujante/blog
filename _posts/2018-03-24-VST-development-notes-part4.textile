@@ -44,7 +44,7 @@ h3. Soften/Cross fade feature
 
 Adding this feature was not too hard: from a UI point of view it is just another On/Off button and is tied to a "standard" parameter. From the processor point of view, it requires to keep track of the previous state of the switch since cross fading happens *only* when transitioning from one input to the next.
 
-The actual implementation is simply doing a linear interpolation between the 2 inputs for the duration of the frame. I reused the concept of templated code (introduced in the again sample coming with the SDK) and enhanced it a little bit to avoid dealing with <code>void **</code> pointers... Templates can be pretty powerful!
+The actual implementation is simply doing a linear interpolation between the 2 inputs for the duration of the frame. I reused the concept of templated code (introduced in the <code>again</code> sample coming with the SDK) and enhanced it a little bit to avoid dealing with <code>void **</code> pointers... Templates can be pretty powerful!
 
 {% highlight cpp %}
 // Use of template to retrieve the proper buffer
@@ -77,7 +77,7 @@ tresult linearCrossFade(AudioBusBuffers &audioBufferIn1,
 
 h3. Adding a processor controlled parameter
 
-The plugin has an LED light which shows whether there is sound or not going on, or in other words a very simplistic VU meter. The again sample provided with the SDK has a full VU meter so it was easy to follow the steps which are not too hard.
+The plugin has an LED light which shows whether there is sound or not going on, or in other words a very simplistic VU meter. The <code>again</code> sample provided with the SDK has a full VU meter so it was easy to follow the steps which are not too hard.
 
 * added another On/Off button in the editor
 * this component gets registered as a parameter in the controller but this time with a flag of <code>ParameterInfo::kIsReadOnly</code> since it is only modified by the code not the user
