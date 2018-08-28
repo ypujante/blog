@@ -248,7 +248,7 @@ The <code>fSwitchState</code> field is used to determine which stereo input we s
 
 h3. Conclusion
 
-At this stage we have a fully working A/B switch. It's not pretty, it doesn't have all the bells and whistle of the Rack Extension but the core part of the plugin is doing what it is supposed to do. The final version should be very similar to the Rack Extension (minus CV handling which is not available in the VST world :( ).
+At this stage we have a fully working A/B switch. It's not pretty, it doesn't have all the bells and whistles of the Rack Extension but the core part of the plugin is doing what it is supposed to do. The final version should be very similar to the Rack Extension (minus CV handling which is not available in the VST world :( ).
 
 h3. Next
 

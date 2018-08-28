@@ -23,7 +23,7 @@ h3. Creating a UI only text edit field
 
 The plugin allows you to give a name to each input. This field is purely UI (the processor does not care about it). But it still needs to be saved as part of the state so that the names are preserved. It turned out to be a much more complicated task that anticipated. Adding a "Text Field" view in the editor (class <code>CTextEdit</code>) and equivalent parameter in the controller like we did for the Audio Switch control actually does not work! A parameter *must* represent a value (between 0 and 1) not a pure string.
 
-In order to do achieve this here are the steps I ended up following (check the source code for details):
+In order to achieve this, here are the steps I ended up following (check the source code for details):
 
 * using the editor, added a "Text Field" view (class <code>CTextField</code>) for each input
 * assign the view to a tag so that we can get a hold of it in the code

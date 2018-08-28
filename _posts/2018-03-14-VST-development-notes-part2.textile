@@ -75,7 +75,7 @@ IPluginFactory* PLUGIN_API GetPluginFactory()
 
 <div class="info">This information is in the VST3 documentation but quite buried... It is on the VST 3 API / VST-MA page (selected in the sidebar) under the section Plug-ins / Module Factory.</div>
 
-Once the host gets access to the factory, it can then calls it back to instantiate the processor and controller.
+Once the host gets access to the factory, it can then call it back to instantiate the processor and controller.
 
 Thankfully the implementation of this method, the factory itself and the class registration is all done via a set of macros (see file <code>ABSwitchVST3.cpp</code>):
 
