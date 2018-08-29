@@ -1,0 +1,249 @@
+---
+layout: post
+title: "Announcing Jamba - VST2/3 framework"
+category: vst
+tags:
+ - vst2
+ - vst3
+ - music
+---
+
+h3. Introduction
+
+After working on the "VST3 development notes":{{site.url}}{% post_url 2018-03-12-VST-development-notes %} series of post and implementing another "VST plugin":https://pongasoft.com/vst/VAC-6V.html, I extracted this learning experience into a new lightweight framework called Jamba. It is now available on "github":https://github.com/pongasoft/jamba.
+
+h3. Details
+
+Starting from scratch developing a VST plugin is quite a task (as was reflected in the previous series of posts). The Jamba framework offers a set of wrapper classes, makefiles, concepts, abstractions and utilities to help with the bootstrapping process. You are still writing a VST plugin with the VST3 SDK (you can actually pretty much override any feature of the framework to bypass it).
+
+The framework takes care of some of the biggest pain points like saving and restoring the state *in a thread safe fashion*.
+
+The "Jamba Sample Gain":https://github.com/pongasoft/jamba-sample-gain plugin is the documentation plugin for this framework and demonstrates most of the features the framework has to offer.
+
+The Jamba framework also provides a simple command line executable which creates a fully functionning (Jamba enabled) plugin: check "Generating a blank plugin":https://github.com/pongasoft/jamba/blob/master/README.md#generating-a-blank-plugin.
+
+h3. Features
+
+Building the Jamba framework started from a set of questions that needed to be answered in order to build the plugins that I was writing. This led to the decision and design of the framework. Here are some of the questions:
+
+h4. How do I create a VST3 plugin that depends on the SDK?
+
+Even the latest 3.6.10 version of the VST3 SDK, which provides instructions for the first time on how to build your own plugin, has it backward with your plugin being built part of the SDK.
+
+Jamba solution is to include <code>jamba.cmake</code> in your project (and having installed the SDK of course), and everything is taken care for you with the dependencies in the proper direction, meaning your plugin depends on the SDK not the other way around. In other words, your plugin is a self contained project that can be easily built by others.
+
+h4. What code do I need to change if I copy/paste an example?
+
+The VST3 SDK comes with a set of examples and it is pretty hard and messy to copy/paste one of them to create your own plugin since it is hard to know what needs to be changed (for example, you need to generate UUIDs...). There is also a lot of boilerplate code.
+
+Jamba offers a simple command line executable which creates a fully functionning (Jamba enabled) plugin: check "Generating a blank plugin":https://github.com/pongasoft/jamba/blob/master/README.md#generating-a-blank-plugin.
+
+<div class="info">The plugin generated is ready to be built including those unique UUIDs. The only thing that cannot be generated is the 4 letter code for VST2 plugins since they need to be registered on the Steinberg website...</div>
+ 
+
+h4. How do I save and restore the state?
+
+<div class="warning">Even the <code>again</code> sample code provided with the VST3 SDK is *not* thread safe (check "getState":https://github.com/steinbergmedia/vst3_public_sdk/blob/master/samples/vst/again/source/again.cpp#L385 => <code>fGain</code>, <code>fGainReduction</code> and <code>bBypass</code> are being accessed from the GUI thread (<code>getState</code> is called by the GUI thread), yet they are owned and modified by the processor code).</div>
+
+Jamba takes care of the state management entirely and does it *in a thread safe fashion* by using the <code>...::LockFree::SingleElementQueue</code> and <code>...::LockFree::AtomicValue</code> concepts. It also takes care of versioning the state so that it is easier to upgrade later on.
+
+h4. How to I map my VST parameter to a &lt;_Type_&gt; ?
+
+VST parameters are represented by a double in the <code>[0.0, 1.0]</code> range.
+
+For example, there are many ways to _map_ a value in this range to a boolean (the C way: 0 is <code>false</code>, anything else is <code>true</code> / the "fair" way: <code>[0.0, 0.5[</code> is <code>false</code>, <code>[0.5, 1.0]</code> is <code>true</code>, etc...).
+
+What matters is that the _mapping_ should be consistent throughout the code.
+
+Jamba offers _typed_ parameters (a _converter_ is provided at creation time) so that the code doesn't deal with this conversion and only deal with the _Type_ (ex: <code>RTVstParam<bool></code>).
+  
+h4. How do I stop duplicating VST related code?
+
+In the VST world, the GUI is the one registering the VST parameters with the SDK. The Real Time (RT) / processing code is also using them. The <code>Processor::getState</code> methods saves the state and the <code>Controller::setComponentState</code> needs to read this state in the same order to initialize the values. There is a lot of duplication and redundancy which can lead to bugs.
+  
+Jamba puts the parameters front and center: you _declare_ them *once* and they are reused throughout the code and Jamba takes care of registering them and storing them.
+
+Check "JSGainParameters":https://github.com/pongasoft/jamba-sample-gain/blob/v1.0.1/src/cpp/JSGainPlugin.h for an example of parameter declaration.
+
+h4. How do I store a user input text field?
+
+In my A/B switch plugin, the user can input the name of the A and/or B source. This obviously needs to be saved so that it is restored when the plugin is later on reopened.
+
+Jamba introduces a new kind of parameter called Jamba parameters which extend the "_double in the <code>[0.0, 1.0]</code> range_" restriction of VST parameters to any type (providing a _serializer_). In this case, the text field is a <code>JmbParam<UTF8String></code> and Jamba will save it automatically. Jamba also introduces a TextField view that will manage it.
+
+Check "Jamba Sample Gain":https://github.com/pongasoft/jamba-sample-gain plugin for an example of using such a parameter.
+
+{% highlight cpp %}
+...
+JmbParam<UTF8String> fInputTextParam; // the input text field
+...
+
+// the free form input text - this param WILL be saved in its owner (GUI) state
+fInputTextParam =
+  jmb<UTF8StringSerializer>(EJSGainParamID::kInputText, STR16("Input Text"))
+    .guiOwned()
+    .defaultValue("Hello from GUI")
+    .add();
+{% endhighlight %}
+
+h4. How do I exchange data between the RT and GUI?
+
+In my VAC-6V plugin, the RT is the one keeping track of the history of peak values that are rendered in the UI. This is quite a challenging problem (thread safe, messaging, timer, view that may or may not be created, etc...).
+
+Jamba makes this problem very simple by using a Jamba parameter and declaring it <code>shared</code>. The RT code simply calls <code>broadcast</code> on it with the new value. The GUI view simply uses this parameter as it would a normal VST parameter.
+
+Check "Jamba Sample Gain":https://github.com/pongasoft/jamba-sample-gain plugin for an example of using such a parameter.
+
+{% highlight cpp %}
+// In RT code (JSGainProcessor.cpp)
+Stats stats{};
+stats.fSampleRate = processSetup.sampleRate;
+stats.fMaxSinceReset = fState.fMaxSinceReset;
+stats.fResetTime = Clock::getCurrentTimeMillis();
+fState.fStats.broadcast(stats); // send to GUI
+
+// In GUI code JSGainStatsView.cpp
+std::ostringstream s;
+s << "Rate=" << fStatsParam->fSampleRate
+  << "| Max=" << toDbString(fStatsParam->fMaxSinceReset)
+  << "| Dur.=" << computeDurationString(Clock::getCurrentTimeMillis() - fStatsParam->fResetTime);
+...
+rdc.drawString(s.str(), ...);
+{% endhighlight %}
+
+h4. How do I exchange data between the GUI and RT?
+
+Although a bit more rare than the other way around, Jamba uses the same mechanism for communicating from the GUI to RT: a <code>shared</code> Jamba parameter (this time <code>guiOwned</code>).
+
+{% highlight cpp %}
+// In GUI code JSGainSendMessageView.cpp
+UIMessage msg{};
+auto const &text = fState->fInputText.getValue(); // note the use of the JmbParam<UTF8String> param
+text.copy(msg.fText, sizeof(msg.fText) / sizeof(msg.fText[0]));
+fState->fUIMessage.broadcast(msg); // send to RT
+
+// In RT code (JSGainProcessor.cpp)
+// Detect the fact that the GUI has sent a message to the RT.
+auto uiMessage = fState.fUIMessage.pop();
+if(uiMessage)
+{
+  DLOG_F(INFO, "Received message from UI <%s> / timestamp = %lld", uiMessage->fText, uiMessage->fTimestamp);
+}
+{% endhighlight %}
+
+h4. How do I write a custom view?
+
+The views are the main UI components (a label, a knob, a slider, etc...). Jamba allows you to write custom views very easily including adding them to the Editor so that they can be used like native components.
+
+Check "Jamba Sample Gain":https://github.com/pongasoft/jamba-sample-gain plugin for several examples on how to write a custiom view.
+
+{% highlight cpp %}
+class JSGainStatsView : public PluginCustomView<JSGainGUIState>, public ITimerCallback
+{
+public:
+  // Constructor
+  explicit JSGainStatsView(const CRect &iSize) : PluginCustomView(iSize)
+  {}
+
+  const CColor &getTextColor() const { return fTextColor;  }
+  void setTextColor(const CColor &iColor) { fTextColor = iColor; }
+  
+  FontPtr getFont() const { return fFont; }
+  void setFont(FontPtr iFont) { fFont = iFont; }
+
+  void registerParameters() override;
+
+  void draw(CDrawContext *iContext) override;
+...
+protected:
+  CColor fTextColor{};
+  FontSPtr fFont{nullptr};
+
+  GUIJmbParam<Stats> fStatsParam{};
+
+public:
+  class Creator : public CustomViewCreator<JSGainStatsView, CustomView>
+  {
+  public:
+    explicit Creator(char const *iViewName = nullptr, char const *iDisplayName = nullptr) noexcept :
+      CustomViewCreator(iViewName, iDisplayName)
+    {
+      registerColorAttribute("text-color",
+                             &JSGainStatsView::getTextColor,
+                             &JSGainStatsView::setTextColor);
+      registerFontAttribute("font",
+                            &JSGainStatsView::getFont,
+                            &JSGainStatsView::setFont);
+    }
+  };
+
+};
+{% endhighlight %}
+
+h4. How do I use multiple parameters to render a view?
+
+As an example, the VAC-6V plugin displays peak values (one parameter) with a color depending on another parameter (soft clipping level).
+
+Jamba makes all parameters accessible to any custom view, and by default (by calling <code>registerXX(xxx, bool iSubscribeToChanges = true)</code>) the view is notified when the parameter changes which makes it trivial to implement a view depending on multiple parameters.
+
+Check "LinkedSliderView":https://github.com/pongasoft/jamba-sample-gain/blob/master/src/cpp/GUI/LinkedSliderView.cpp custom view for an example.
+
+{% highlight cpp %}
+// calback when fLinkedSlider or fLink changes
+void GenericLinkedSliderView::onParameterChange(ParamID iParamID)
+{
+  if(fLinkedSlider.getParamID() == iParamID)
+  {
+    if(fLink && fSlider != fLinkedSlider)
+      fSlider.copyValueFrom(fLinkedSlider);
+    return;
+  }
+
+  if(fLink.getParamID() == iParamID)
+  {
+    if(fLink && fSlider.getValue() < fLinkedSlider.getValue())
+      fSlider.copyValueFrom(fLinkedSlider);
+    return;
+  }
+}
+{% endhighlight %}
+
+h4. How do I use 4 frames for a toggle?
+
+The VST3 SDK comes with a toggle that uses only 2 frames.
+
+Jamba introduces:
+
+* Jamba - Toggle Button (on/off)
+* Jamba - Momentary Button (on when pressed)
+
+which are 2 views handling either 2 or 4 frames (the extra 2 frames deal with the state: pressed/not pressed).
+
+h4. How do I write unit tests for my plugin?
+
+When you are not familiar with cmake and C++ development, coming up with a solution to write unit tests is a bit challenging and quite time consuming.
+
+Although there are many ways to accomplish this, <code>jamba.cmake</code> offers an integration with Google Test as a starting point. When using the "Generating a blank plugin":https://github.com/pongasoft/jamba/blob/master/README.md#generating-a-blank-plugin command, the plugin comes with a single unit test example so that it is easy to add more tests without having to deal with the details.
+
+You can obviously use your own test framework if you wish to.
+
+h4. How do I build/test/edit/validate/install my plugin?
+
+Although the tools are part of the VST3 SDK, it is very manual and time consuming to figure out how to compile and run them with the right set of arguments.
+
+By including <code>jamba.cmake</code>, Jamba generates shell/bat convenient scripts:
+
+* <code>build.sh</code> => compiles the plugin and generates the <code>.vst3</code> bundle
+* <code>test.sh</code> => runs the unit tests
+* <code>validate.sh</code> => runs the validator tool which executes some vst specific tests against the plugin and make sure it complies with VST3
+* <code>edit.sh</code> => in Debug mode, the plugin can always be edited by right clicking in the UI but it can be pretty time consuming to generate the plugin, install it, start a DAW in order to simply edit the UI. This shell script starts the convenient tool (which comes with the VST3 SDK) to edit the plugin outside a DAW
+* <code>install.sh</code> => copies the plugin in its appropriate folders (on macOS)
+
+h4. How do I build build for macOS and Windows 10?
+
+Jamba comes with support for both macOS and Windows 10 out of the box and you can write your code on one platform and compile/build on the other as well (as long as the source of truth is the <code>CMakeLists.txt</code>). The files that are important are:
+
+* <code>CMakeLists.txt</code> which contains the list of sources (you need to add your own source files in the <code>vst_sources</code> list). "Example":https://github.com/pongasoft/jamba-sample-gain/blob/v1.0.1/CMakeLists.txt#L37.
+* <code>CMakeLists.txt</code> which contains the list of resources (graphics) for the UI for macOS (section <code>smtg_add_vst3_resource</code>). "Example":https://github.com/pongasoft/jamba-sample-gain/blob/v1.0.1/CMakeLists.txt#L67.
+* <code>resource/XXX.rc</code> which contains the list of resources (graphics) for the UI for windows. "Example":https://github.com/pongasoft/jamba-sample-gain/blob/v1.0.1/resource/JSGain.rc.
+

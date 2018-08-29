@@ -170,15 +170,21 @@ div.nav .next {
 /**
  * specific css */
 .post-content div.warning {
-  border: dashed 2px #9c5e00;
-  background-color: #bdad93;
+  background-color: #ffeeee;
+  border-top: solid 1px #ddcccc;
+  border-right: solid 1px #ddcccc;
+  border-bottom: solid 1px #ddcccc;
   padding: 10px;
+  border-left: 0.2em solid black;
 }
 
 .post-content div.info {
-  border: dashed 2px #44aa44;
   background-color: #eeffee;
+  border-top: solid 1px #ccddcc;
+  border-right: solid 1px #ccddcc;
+  border-bottom: solid 1px #ccddcc;
   padding: 10px;
+  border-left: 0.2em solid black;
 }
 
 .post-content figure.image {
