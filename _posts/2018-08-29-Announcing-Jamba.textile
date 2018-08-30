@@ -20,7 +20,7 @@ The framework takes care of some of the biggest pain points like saving and rest
 
 The "Jamba Sample Gain":https://github.com/pongasoft/jamba-sample-gain plugin is the documentation plugin for this framework and demonstrates most of the features the framework has to offer.
 
-The Jamba framework also provides a simple command line executable which creates a fully functionning (Jamba enabled) plugin: check "Generating a blank plugin":https://github.com/pongasoft/jamba/blob/master/README.md#generating-a-blank-plugin.
+The Jamba framework also provides a simple command line executable which creates a fully functionning (Jamba enabled) plugin: check "Quick Starting Guide":https://github.com/pongasoft/jamba#quick-starting-guide.
 
 h3. Features
 
@@ -36,7 +36,7 @@ h4. What code do I need to change if I copy/paste an example?
 
 The VST3 SDK comes with a set of examples and it is pretty hard and messy to copy/paste one of them to create your own plugin since it is hard to know what needs to be changed (for example, you need to generate UUIDs...). There is also a lot of boilerplate code.
 
-Jamba offers a simple command line executable which creates a fully functionning (Jamba enabled) plugin: check "Generating a blank plugin":https://github.com/pongasoft/jamba/blob/master/README.md#generating-a-blank-plugin.
+Jamba offers a simple command line executable which creates a fully functionning (Jamba enabled) plugin: check "Quick Starting Guide":https://github.com/pongasoft/jamba#quick-starting-guide.
 
 <div class="info">The plugin generated is ready to be built including those unique UUIDs. The only thing that cannot be generated is the 4 letter code for VST2 plugins since they need to be registered on the Steinberg website...</div>
  
@@ -223,7 +223,7 @@ h4. How do I write unit tests for my plugin?
 
 When you are not familiar with cmake and C++ development, coming up with a solution to write unit tests is a bit challenging and quite time consuming.
 
-Although there are many ways to accomplish this, <code>jamba.cmake</code> offers an integration with Google Test as a starting point. When using the "Generating a blank plugin":https://github.com/pongasoft/jamba/blob/master/README.md#generating-a-blank-plugin command, the plugin comes with a single unit test example so that it is easy to add more tests without having to deal with the details.
+Although there are many ways to accomplish this, <code>jamba.cmake</code> offers an integration with Google Test as a starting point. When following the "Quick Starting Guide":https://github.com/pongasoft/jamba#quick-starting-guide, the plugin comes with a single unit test example so that it is easy to add more tests without having to deal with the details.
 
 You can obviously use your own test framework if you wish to.
 
