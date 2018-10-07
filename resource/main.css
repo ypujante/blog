@@ -273,6 +273,14 @@ a.nav-cc:hover {
   margin-bottom: 0.2em;
 }
 
+.sidebar .entry .pixels-photo img {
+  max-width: 100%;
+}
+
+.sidebar .entry .pixels-photo figure {
+  margin: 0;;
+}
+
 .contact-email {
   font-style: italic;
 }
