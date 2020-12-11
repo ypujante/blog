@@ -79,8 +79,6 @@ a:hover {
 
 
   border-spacing: 0;
-  border-top: solid 1px white;
-  border-bottom: groove 1px white;
   background: {{ site.contentBGColor }};
   display: grid;
   grid-template-columns: auto auto auto;
@@ -106,11 +104,8 @@ div.nav .next {
 .post-title {
    font-size: 1.5em;
    font-weight: bold;
-   background: {{ site.titleBGColor }};
+   background: #aaaaaa;
    color: {{ site.titleFGColor }};
-   border-color: {{ site.contentBGColor }} {{ site.contentBGColor }} white;
-   border-style: solid solid groove;
-   border-width: 1px;
    margin: 0;
    padding: 20px;
    text-shadow: 2px 2px 2px #000000;
@@ -247,13 +242,10 @@ a.nav-cc:hover {
 }
  
 .sidebar .entry dt {
-  background: {{ site.titleBGColor }};
+  background: #aaaaaa;
   color: {{ site.titleFGColor }};
   text-shadow: 1px 1px 1px #000000;
   padding: 0.5em;
-  border-color: {{ site.contentBGColor }} {{ site.contentBGColor }} white;
-  border-style: solid solid groove;
-  border-width: 1px;
 }
 
 .sidebar .entry dd {

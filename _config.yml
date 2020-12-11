@@ -12,7 +12,7 @@ contentBGColor: '#eeeeee'
 contentFGColor: 'black'
 titleBGColor: '#600000'
 titleFGColor: 'white'
-contentFontFamily: 'Helvetica,Arial,sans-serif'
+contentFontFamily: 'Arial,Helvetica,sans-serif'
 monospaceFontFamily: 'Courier New,monospace'
 dateBackgroundColor: '#888888'
 

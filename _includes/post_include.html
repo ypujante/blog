@@ -16,19 +16,6 @@
       <div class="post-title">
         {{ post.title }}
       </div>
-      <div class="nav">
-        <div class="next">
-          {% if post.next %}
-          <a href="{{site.url}}{{ post.next.url }}" title="{{ post.next.title }}"><span class="nav-arrow">&larr;</span>&nbsp;Next</a>
-          {% endif %}
-        </div>
-        <div class="home"><a href="{{site.url}}" title="View latest post">Latest</a> | <a href="{{site.url}}/categories/All" title="View all posts">All</a></div>
-        <div class="previous">
-          {% if post.previous %}
-          <a href="{{site.url}}{{ post.previous.url }}" title="{{ post.previous.title }}">Previous&nbsp;<span class="nav-arrow">&rarr;</span></a>
-          {% endif %}
-        </div>
-      </div>
       <div class="post-content">
         {{ content }}
       </div>

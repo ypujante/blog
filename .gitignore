@@ -3,3 +3,4 @@ _site
 .idea
 *.iml
 deploy.sh
+.jekyll-cache
