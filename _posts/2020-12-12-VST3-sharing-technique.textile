@@ -1,0 +1,358 @@
+---
+layout: post
+title: "How to share data between RT and UI in VST3"
+category: vst
+tags:
+ - vst2
+ - vst3
+ - music
+---
+
+h3. Introduction
+
+This post describes a way to share (large amounts of) data between the UI layer and the RT (real time) layer of a VST3 plugin. Although it is *not* recommended to actually share data (messaging is the preferred approach in VST3), there are use cases where using pure messaging is very expensive.
+
+For example, in my "SAM-SPL 64":https://pongasoft.com/vst/SAM-SPL64.html VST plugin, the user can load a sample to work with (which can be arbitrarily large). The UI layer needs the sample because it renders it as a waveform (including an editing tab where you can zoom in and out of the waveform). The RT layer needs the sample because it plays it. Using messaging requires copying the sample multiple times (at the very minimum UI -> messaging, messaging -> RT) and also keeping 2 distinct copies.
+
+<img src="https://pongasoft.com/images/vst/SAM-SPL64/SAM-SPL64-Edit.jpg" width="100%">
+
+h3. High level description
+
+The main idea is to use a pair of <code>std::shared_ptr</code> pointing to the _same_ (immutable) object when sharing. When one side updates its <code>std::shared_ptr</code> then they are pointing to different objects and a (very lightweight) message is sent to the other side so that it can update its own pointer to the new one: they now point to the same object again.
+
+{% highlight text %}
+
+// start
+- UI shared_ptr -> nullptr
+- RT shared_ptr -> nullptr
+
+// new object (A) in RT
+- UI shared_ptr -> nullptr
+- RT shared_ptr -> A | version 1
+- RT sends "version 1" message to UI
+- UI receives "version 1" notification and copies RT shared_ptr
+- UI shared_ptr -> A | version 1
+
+// new object (B) in UI
+- RT shared_ptr -> A | version 1
+- UI shared_ptr -> B | version 2
+- UI sends "version 2" message to RT
+- RT receives "version 2" notification and copies UI shared_ptr
+- A is destroyed as a result (assuming the rest of the code is not still pointing to it)
+- RT shared_ptr -> B | version 2 
+{% endhighlight %}
+
+<div class="info">As can be seen in this protocol:
+* Only lightweight messages are exchanged ("version" is just a number)
+* No object copy actually happens, we only copy <code>shared_ptr</code>
+</div>
+
+
+h3. Implementation details
+
+h4. The <code>SharedObjectMgr</code>
+
+The pair of <code>std::shared_ptr</code> is encapsulated in a class "SharedObjectMgr":https://github.com/pongasoft/vst-sam-spl-64/blob/master/src/cpp/SharedObjectMgr.h along with a version so that we make sure that we don't update to the wrong version (messaging is asynchronous so we can't know for sure the order in which events will happen).
+
+The class uses a <code>SpinLock</code> to ensure thread safety. Locking is very lightweight and the critical section only modifies shared pointers and version values which should never be an issue in practice. Also due to the notification mechanism, locking should happen only when something changes (in my case it is only when the user loads a sample, or uses sampling, which is very rare).
+
+There are 2 primary methods on each side, prefixed by which side *should* call them:
+
+* <code>uiSetObject</code> and <code>uiAdjustObjectFromRT</code> for the UI side
+* <code>rtSetObject</code> and <code>rtAdjustObjectFromUI</code> for the RT side
+
+Example of usage from RT:
+
+* RT has a new <code>ObjectType</code> to share with UI
+* RT calls <code>mgr.rtSetObject</code> and gets a version [<code>v</code>]
+* RT sends <code>v</code> to UI via messaging (<code>RTJmbOutParam.broadcast(v)</code> with Jamba)
+* UI receives <code>v</code> via messaging (simple callback with Jamba)
+* UI calls <code>mgr.uiAdjustObjectFromRT(v)</code> and gets the new <code>ObjectType</code>
+
+Usage from UI follows the exact same pattern:
+
+* UI has a new <code>ObjectType</code> to share with RT
+* UI calls <code>mgr.guiSetObject</code> and gets a version [<code>v</code>]
+* UI sends <code>v</code> to RT via messaging (<code>GUIJmbParam.broadcast(v)</code> with Jamba)
+* RT receives <code>v</code> via messaging (<code>RTJmbInParam.pop()</code> with Jamba)
+* RT calls <code>mgr.rtAdjustObjectFromUI(v)</code> and gets the new <code>ObjectType</code>
+
+<div class="info">On the RT side, it is recommended to extract and use the pointer directly instead of the <code>std::shared_ptr</code> because <code>std::shared_ptr</code> uses locks internally, and the object will never be deleted unless RT acts on it (<code>mgr.rtSetObject</code> or <code>mgr.rtAdjustObjectFromUI(v)</code>): each side manages its own (shared) pointer separately.</div>
+
+h4. Sharing the <code>SharedObjectMgr</code>
+
+In order to share the manager itself, RT creates it and send it to the UI via messaging:
+* serializing the pointer <code>reinterpret_cast<uint64>(ptr)</code> on the RT side
+* deserializing it on the UI side <code>reinterpret_cast<SharedObjectMgr *>(ser)</code>
+
+In order for the host to keep RT and UI in the same process, thus making sharing possible, the plugin must be declared *not* distributable (the flag <code>Steinberg::Vst::kDistributable</code> *must not* be set).
+
+<div class="warning">
+There are a couple of details to pay attention to:
+
+1. When using the editor to work on the GUI, the RT is not created or executed, and as a result the manager is never sent to the UI
+2. It is hard to predict (and guarantee) the order in which the plugin will get initialized and when messages are actually exchanged, meaning the UI may need the manager prior to receiving it from RT.
+
+It is thus recommended to create one in the GUI and discard it (and transfer its state) when the one from RT is received.
+
+{% highlight cpp %}
+// Example on how to handle it in the UI
+
+// With the following definitions
+// using SharedSampleBuffersMgr32 = SharedObjectMgr<SampleBuffers<Sample32>, int64>;
+// mutable std::unique_ptr<SharedSampleBuffersMgr32> fGUIOnlyMgr{};
+
+// the code always call getSharedMgr() which does the right thing
+SharedSampleBuffersMgr32 *SampleMgr::getSharedMgr() const
+{
+  auto sharedMgr = *fState->fSharedSampleBuffersMgrPtr;
+
+  if(sharedMgr)
+    return sharedMgr;
+
+  // case when we have not received the manager yet
+  if(!fGUIOnlyMgr)
+    fGUIOnlyMgr = std::make_unique<SharedSampleBuffersMgr32>();
+
+  return fGUIOnlyMgr.get();
+}
+
+// the callback gets registered to handle the manager from RT
+void SampleMgr::registerParameters()
+{
+  // ...
+  registerCallback<SharedSampleBuffersMgr32 *>(fParams->fSharedSampleBuffersMgrPtr,
+    [this] (GUIJmbParam<SharedSampleBuffersMgr32 *> &iParam) {
+      auto mgr = *iParam;
+      if(fGUIOnlyMgr)
+      {
+        auto uiBuffers = fGUIOnlyMgr->uiGetObject();
+
+        if(uiBuffers)
+        {
+          // there was a buffer that we need to transfer to the real time
+          auto version = mgr->uiSetObject(uiBuffers);
+
+          // we tell RT
+          fGUINewSampleMessage.broadcast(version);
+        }
+
+        fGUIOnlyMgr = nullptr;
+      }
+    });
+  // ...
+}
+{% endhighlight %}
+
+</div>
+
+
+h3. Using "Jamba":https://jamba.dev
+
+This section will show how to do it with Jamba since a lot of facilities are readily available.
+
+h4. Parameters
+
+We need 3 parameters: one for the manager (pointer) and 2 for the version (one in each direction)
+
+{% highlight cpp %}
+// declaration
+JmbParam<int64> fUIToRTVersion; // used by UI to communicate new version to RT
+JmbParam<int64> fRTToUIVersion; // used by RT to communicate new version to UI
+JmbParam<SharedObjectMgr<MyType> *> fSharedObjectMgrPtr; // the shared mgr
+
+// definition
+fUIToRTVersion =
+  jmb<Int64ParamSerializer>(EParamIDs::kUIToRTVersion, STR16 ("UI Version (msg)"))
+    .guiOwned()
+    .shared()
+    .transient()
+    .add();
+
+fRTToUIVersion =
+  jmb<Int64ParamSerializer>(EParamIDs::kRTToUIVersion, STR16 ("RT Version (msg)"))
+    .rtOwned()
+    .shared()
+    .transient()
+    .add();
+
+fSharedObjectMgrPtr =
+  jmb<PointerSerializer<SharedObjectMgr<MyType>>(EParamIDs::kSharedObjectMgrPtr, STR16 ("Shared Mgr (ptr)"))
+    .transient()
+    .rtOwned()
+    .shared()
+    .add();
+
+{% endhighlight %}
+
+h4. Serializing the pointer
+
+Implement the <code>IParamSerializer</code> and serialize the pointer into a <code>uint64</code>.
+
+{% highlight cpp %}
+template<typename T>
+class PointerSerializer : public IParamSerializer<T *>
+{
+public:
+  using ParamType = T *;
+
+  static_assert(sizeof(ParamType) <= sizeof(uint64), "Making sure that a pointer will fit");
+
+  tresult readFromStream(IBStreamer &iStreamer, ParamType &oValue) const override
+  {
+    uint64 ptr;
+
+    auto res = IBStreamHelper::readInt64u(iStreamer, ptr);
+    if(res != kResultOk)
+      return res;
+
+    oValue = reinterpret_cast<ParamType>(ptr);
+
+    return res;
+  }
+
+  tresult writeToStream(ParamType const &iValue, IBStreamer &oStreamer) const override
+  {
+    if(oStreamer.writeInt64u(reinterpret_cast<uint64>(iValue)))
+      return kResultOk;
+    else
+      return kResultFalse;
+  }
+};
+{% endhighlight %}
+
+h4. RT Side
+
+On the RT side, we have the 3 parameters + the manager itself (which needs to be shared with the UI).
+
+{% highlight cpp %}
+
+// definition (PluginRTState)
+RTJmbInParam<int64> fUIToRTVersion;
+RTJmbOutParam<int64> fRTToUIVersion;
+RTJmbOutParam<SharedObjectMgr<MyType> *> fSharedObjectMgrPtr;
+
+SharedObjectMgr<MyType> fSharedMgr{};
+  
+// Usage | sending the shared pointer to the UI
+tresult SampleSplitterProcessor::setupProcessing(ProcessSetup &setup)
+{
+  // ...
+  
+  // sending the shared pointer to the UI
+  fState.fSharedObjectMgrPtr.broadcast(&fState.fSharedMgr);
+  
+  // ...
+}
+
+// Usage | receiving a MyType from UI
+tresult SampleSplitterProcessor::processInputs(ProcessData &data)
+{
+  // ...
+  
+  auto version = fState.fUIToRTVersion.pop();
+  if(version)
+  {
+    auto myObject = fState.fSharedMgr.rtAdjustObjectFromUI(*version);
+
+    if(myObject)
+    {
+      // store myObject.get() somewhere and use it in the rest of the code
+    }
+
+  }
+  
+  // ...
+}
+
+// Usage | updating MyType on the RT side
+template<typename SampleType>
+tresult SampleSplitterProcessor::genericProcessInputs(ProcessData &data)
+{
+  // ...
+  
+  auto myObject = std::make_shared<MyType>(...);
+    
+  // we store it in the mgr
+  auto version = fState.fSharedMgr.rtSetObject(myObject);
+  
+  // and notify the UI of the new sample
+  fState.fRTToUIVersion.broadcast(version);
+  
+  // store myObject.get() somewhere and use it in the rest of the code
+  
+  // ...
+}
+{% endhighlight %}
+
+h4. UI Side
+
+On the UI side, we have the 3 parameters (and potentially a UI version of the manager, see warning section above to why).
+
+
+{% highlight cpp %}
+// definition
+GUIJmbParam<int64> fUIToRTVersion;
+GUIJmbParam<SharedObjectMgr<MyType> *> fSharedObjectMgrPtr;
+// no need to define fRTToUIVersion as we can use the one in Parameters instead
+
+// retrieving manager
+SharedObjectMgr<MyType> *getSharedMgr()
+{
+  // ... see above for more complicated implementation accounting for
+  // no RT or non deterministic messaging 
+  return *fSharedObjectMgrPtr;
+}
+
+// Usage | updating MyType on the UI side (from some view, controller, or listener)
+void myFunction()
+{
+
+  // ....
+  auto myObject = std::make_shared<MyType>(...);
+    
+  // we store it in the mgr
+  auto version = getSharedMgr()->uiSetObject(myObject);
+
+  // we tell RT
+  fUIToRTVersion.broadcast(version);
+
+}
+
+// Usage | receiving a MyType from RT
+void XXXController::registerParameters()
+{
+  // ...
+  
+  registerCallback<int64>(fParams->fRTToUIVersion,
+                         [this] (GUIJmbParam<int64> &iParam) {
+                           auto version = *iParam;
+                           
+                           auto myObject = getSharedMgr()->uiAdjustObjectFromRT(version);
+
+                           if(myObject)
+                           {
+                             // ...
+                           }
+                         });
+  
+  // ...
+}
+{% endhighlight %}
+
+h4. Making the plugin *not* distributable
+
+You can simply call the "<code>JambaPluginFactory::GetNonDistributableVST3PluginFactory</code>":https://pongasoft.github.io/jamba/docs/5.1.1/html/classpongasoft_1_1_v_s_t_1_1_jamba_plugin_factory.html#aea5d08ecadfa454e476f47b4bdb982b1 API to make the plugin non distributable.
+
+
+h3. Conclusion
+
+Implementing such a technique is definitely quite involved and complicated with multiple edge cases to deal with (like no RT when running the editor, messaging order, thread safety, etc...). In any case, I would not recommend using it unless you really want to share large amounts of data. If messaging can do the trick, just stick to it!
+
+The latest version of "SAM-SPL 64":https://github.com/pongasoft/vst-sam-spl-64 implements this pattern/protocol and is the source of inspiration for this blog post.
+
+This solution works quite well for my use case because what is shared only changes on user action (user loads a new sample, user uses sampling, user reloads the plugin).
+
+<div class="warning">
+One of the issue in this design is the fact that the critical section under lock may end up deleting an object which could affect RT. It is a non issue in my use case because of the fact that it can only happen on user action, not while the plugin is being used for rendering the sound. One improvement would be to have "delete" only happen on the UI side outside of the critical section under lock.
+</div>

@@ -1,5 +1,4 @@
 # jekyll related entries
-highlighter: pygments
 url: https://www.pongasoft.com/blog/yan
 permalink: pretty
 category_title_prefix: ''
@@ -7,7 +6,7 @@ exclude: ['jkdev.sh', 'brokenbits-blog.iml']
 
 # css related entries
 mainColor1: '#005a87'
-mainColor2: '#0075b0'
+mainColor2: '#244353'
 contentBGColor: '#eeeeee'
 contentFGColor: 'black'
 titleBGColor: '#600000'

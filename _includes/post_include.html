@@ -16,8 +16,24 @@
       <div class="post-title">
         {{ post.title }}
       </div>
+      <div class="nav">
+        {% if post.next %}
+        <a href="{{site.url}}{{ post.next.url }}" title="Next | {{ post.next.title }}">&lt;&lt;</a>
+        {% endif %}
+        {% if post.previous %}
+        <a href="{{site.url}}{{ post.previous.url }}" title="Previous | {{ post.previous.title }}">&gt;&gt;</a>
+        {% endif %}
+      </div>
       <div class="post-content">
         {{ content }}
+      </div>
+      <div class="nav">
+        {% if post.next %}
+        <a href="{{site.url}}{{ post.next.url }}" title="Next | {{ post.next.title }}">&lt;&lt;</a>
+        {% endif %}
+        {% if post.previous %}
+        <a href="{{site.url}}{{ post.previous.url }}" title="Previous | {{ post.previous.title }}">&gt;&gt;</a>
+        {% endif %}
       </div>
       <div class="post-info">
         {{post.date | date: "%b %d %Y"}} - Posted by Yan in
