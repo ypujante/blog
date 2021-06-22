@@ -242,9 +242,10 @@ a.nav-cc:hover {
   list-style: none;
 }
 
-.sidebar .entry dd ul li {
-  border-bottom: dotted 1px #aaaaaa;
-  margin-bottom: 0.2em;
+.sidebar .entry dd ul li:not(:first-child) {
+  border-top: dotted 1px #aaaaaa;
+  margin-top: 0;
+  padding-top: 0.3em;
 }
 
 .sidebar .entry .pixels-photo img {
@@ -255,12 +256,12 @@ a.nav-cc:hover {
   margin: 0;
 }
 
-.sidebar .entry .soundcloud-music figure {
+.sidebar .entry figure {
   text-align: center;
   margin: 0;
 }
 
-.sidebar .entry .soundcloud-music img {
+.sidebar .entry img {
   max-width: 150px;
 }
 
