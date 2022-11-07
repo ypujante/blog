@@ -20,6 +20,4 @@ plugins:
 - jekyll-textile-converter
 
 # post related entries
-withTwitter: false
-withGoogle: false
 prodMode: true

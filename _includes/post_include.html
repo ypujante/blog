@@ -18,10 +18,13 @@
       </div>
       <div class="nav">
         {% if post.next %}
-        <a href="{{site.url}}{{ post.next.url }}" title="Next | {{ post.next.title }}">&lt;&lt;</a>
+        <a href="{{site.url}}{{ post.next.url }}" title="Back | {{ post.next.title }}">&lt;&lt;&nbsp;Back</a>
+        {% endif %}
+        {% if post.previous and post.next %}
+        &nbsp;
         {% endif %}
         {% if post.previous %}
-        <a href="{{site.url}}{{ post.previous.url }}" title="Previous | {{ post.previous.title }}">&gt;&gt;</a>
+        <a href="{{site.url}}{{ post.previous.url }}" title="Next | {{ post.previous.title }}">Next&nbsp;&gt;&gt;</a>
         {% endif %}
       </div>
       <div class="post-content">
@@ -29,10 +32,13 @@
       </div>
       <div class="nav">
         {% if post.next %}
-        <a href="{{site.url}}{{ post.next.url }}" title="Next | {{ post.next.title }}">&lt;&lt;</a>
+        <a href="{{site.url}}{{ post.next.url }}" title="Back | {{ post.next.title }}">&lt;&lt;&nbsp;Back</a>
+        {% endif %}
+        {% if post.previous and post.next %}
+        &nbsp;
         {% endif %}
         {% if post.previous %}
-        <a href="{{site.url}}{{ post.previous.url }}" title="Previous | {{ post.previous.title }}">&gt;&gt;</a>
+        <a href="{{site.url}}{{ post.previous.url }}" title="Next | {{ post.previous.title }}">Next&nbsp;&gt;&gt;</a>
         {% endif %}
       </div>
       <div class="post-info">
