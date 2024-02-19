@@ -1,0 +1,87 @@
+---
+layout: post
+title: "The power of emscripten ports"
+category: webassembly
+tags:
+ - emscripten
+ - webassembly
+ - wasm
+ - glfw
+---
+
+h3. Introduction
+
+After spending quite a bit of time "enhancing the ports system in emscripten":https://github.com/emscripten-core/emscripten/pulls?q=is%3Amerged+is%3Apr+author%3Aypujante, I wanted to share my experience about why I think emscripten ports are a really powerful concept.
+
+h3. What is emscripten?
+
+"Emscripten":https://emscripten.org/ is a _complete compiler toolchain to WebAssembly_. In a nutshell, it lets you compile C and C++ code for the "WebAssembly":https://webassembly.org/ platform including targetting code that runs in your browser.
+
+h3. What is a WebAssembly port?
+
+A WebAssembly port is a port of some code to make it run in the context of the web platform (both client and server).
+
+Let's say you have the following C function <code>int add(int a, int b) { return a+b; }</code>. You can easily compile this code to WebAssembly using emscripten (<code>emcc</code>) and there is no real porting necessary.
+
+What if your code is now the "GLFW":https://www.glfw.org/ library? The library is a C API and comes with implementations for various (desktop) targets (ex: Windows, macOS, etc...). But if you compile this C code with emscripten, it is not going to result in a binary that you can actually use in a Web context. It needs to be ported to the WebAssembly platform.
+
+There is a limited built-in port of GLFW (written 100% in Javascript). And I released a more comprehensive (free and open source) port written in C++ (with as little Javascript as necessary): "emscripten-glfw":https://github.com/pongasoft/emscripten-glfw.
+
+Both of these implementations are (WebAssembly) ports in the sense that they let you write your C or C++ code against the GLFW API and it will work in a browser context. For example you can check this live "demo":https://pongasoft.github.io/emscripten-glfw/test/demo/main.html.
+
+Emscripten has a good "documentation":https://emscripten.org/docs/porting/index.html about what it means to port your code to WebAssembly.
+
+h3. What is an emscripten port?
+
+Emscripten also defines the concept of ports which can be a bit confusing. Per the "documentation":https://emscripten.org/docs/compiling/Building-Projects.html#emscripten-ports, _Emscripten Ports is a collection of useful libraries, ported to Emscripten_. I think a better definition would be: _Emscripten Ports is a collection of useful libraries, ported to WebAssembly and easily usable with emscripten_.
+
+What this means, is that there is a very easy (= very powerful) way to use a WebAssembly port that was made by somebody else: by simply using the <code>emcc</code> option <code>--use-port</code> you *declare* that you want to use a port and emscripten takes care of 2 things:
+
+# Fetch the code of the WebAssembly port
+# Compile it and make it available to you (including headers)
+
+For example:
+
+{% highlight text %}
+emcc --use-port=sdl2 main.c -o /tmp/main.html
+{% endhighlight %}
+
+By simply using the option <code>--use-port=sdl2</code>, emscripten will fetch (= download) the WebAssembly port from its source, then compile it with the right set of flags and options for the Web platform and make all the SDL2 header files available for your code.
+
+This is where the power lives: you don't have to worry about where the port is located, how to compile it, how to add the headers to the list of include directories, etc... It just works like magic.
+
+If you have ever used java/gradle, it is very much like *declaring* a dependency: the system takes care of locating it, downloading it and making it available in your classpath.
+
+At this moment, if you want to use "raylib":https://www.raylib.com/ there is a WebAssembly port available, meaning raylib can be compiled for the Web/HTML5 platform. The instructions to do so are "there":https://github.com/raysan5/raylib/wiki/Working-for-Web-(HTML5). It is quite complicated (including cloning the repo, following all the instructions, etc...). If/when there is an emscripten port, it will be as simple as <code>--use-port=contrib.raylib</code>.
+
+h3. The port file
+
+The way the _magic_ works is by having a port file which is a python script containing the code necessary to fetch and compile the code. In other words, it is a _recipe_ to use a WebAssembly port. The syntax is a bit clunky and use some internal APIs, but it does the job.
+
+When you write <code>--use-port=sdl2</code>, really what happens is that the code in <code>EMSDK_ROOT/tools/ports/sdl2.py</code> gets used.
+
+Since my contributions in emscripten 3.1.54:
+
+* ports can have options
+{% highlight text %}
+# declare which formats sdl2_image should be compiled with
+emcc --use-port=sdl2_image:formats=png,jpg main.c -o /tmp/main.html
+{% endhighlight %}
+* ports can be contributed by a wider audience (contrib ports)
+{% highlight text %}
+# a contrib port is not officially maintained by emscripten
+emcc --use-port=contrib.glfw3 main.c -o /tmp/main.html
+{% endhighlight %}
+* ports can be external
+{% highlight text %}
+# a local port
+emcc --use-port=/path/to/port.py main.c -o /tmp/main.html
+{% endhighlight %}
+
+Because port files can be entirely external, it is fairly easy to create one and test it without having to clone emscripten and submit a pull request (PR). If the port is successful, it can eventually be submitted to the contrib folder (which requires cloning/PR).
+
+You can also copy a built-in emscripten port file locally and use the local copy if you want to make sure you always use the same version of a port as emscripten can be updated whether you want it or not (version locking).
+
+h3. Final thoughts
+
+I really do beleive that emscripten ports are truly powerful and I hope I was able to convince you :). If you want to use my own port, check the "emscripten-glfw":https://github.com/pongasoft/emscripten-glfw project for a modern, very compliant implementation of GLFW3.
