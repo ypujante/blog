@@ -212,6 +212,16 @@ a.nav-cc:hover {
    color: white;
  }
 
+.img-responsive {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.img-shadow {
+  box-shadow: 0 0 10px 0 rgba(0,0,0,0.5);
+  max-width: 90%;
+}
+
 /***********************************
  * sidebar
  ***********************************/

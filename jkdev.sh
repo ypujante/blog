@@ -1,2 +1,2 @@
 #!/bin/sh
-jekyll serve --config "_config.yml,_config-dev.yml" $@
+jekyll serve --future --config "_config.yml,_config-dev.yml" $@
